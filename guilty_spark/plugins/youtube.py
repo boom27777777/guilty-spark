@@ -9,10 +9,10 @@ from guilty_spark.networking import fetch_page
 def on_message(message):
     if '!youtube' in message.content:
         if len(message.content) > 1024:
-            yield from bot.send_message(message.channel, 'Nope!')
+            yield from bot.say(message.channel, 'Nope!')
         args = message.content.split(' ')
         if len(args) < 2:
-            yield from bot.send_message(message.channel, 'Usage: !youtube [search]')
+            yield from bot.say('Usage: !youtube [search]')
             return
 
         url = 'https://www.youtube.com/results?' + urlencode(
@@ -21,5 +21,5 @@ def on_message(message):
         links = re.findall('<a href="(\/watch\?v=[^"]+)"', html.decode())
         if links:
             link = 'http://youtube.com' + links[0]
-            yield from bot.send_message(message.channel, link)
+            yield from bot.say(link)
         return

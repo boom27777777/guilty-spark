@@ -17,8 +17,11 @@ class Monitor(discord.Client):
                 yaml.dump({'owner': '', 'token': ''}, settings,
                           default_flow_style=False)
             raise IOError
+
         with open(settings_file) as settings:
             self.settings = yaml.load(settings)
+
+        self.current_message = None
 
     def login(self, *args):
         yield from super().login(self.settings['token'])
@@ -27,6 +30,10 @@ class Monitor(discord.Client):
         if name not in self.event_callbacks:
             self.event_callbacks[name] = []
         self.event_callbacks[name].append(func)
+
+    def say(self, message: str):
+        if self.current_message:
+            yield from self.send_message(self.current_message.channel, message)
 
     @asyncio.coroutine
     def on_ready(self):
@@ -42,6 +49,8 @@ class Monitor(discord.Client):
         )
         if message.author == self.user:
             return
+
+        self.current_message = message
 
         if message.content.startswith('!'):
             if message.content == '!who':
