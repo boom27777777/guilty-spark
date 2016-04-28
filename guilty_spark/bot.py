@@ -4,8 +4,9 @@ import asyncio
 import logging
 import os
 
+
 class Monitor(discord.Client):
-    def __init__(self, settings_file: str='', **options):
+    def __init__(self, settings_file: str = '', **options):
         super().__init__(**options)
         self.event_callbacks = {}
         self.description = 'I am the Monitor of Installation 04. ' \
@@ -52,10 +53,11 @@ class Monitor(discord.Client):
 
         self.current_message = message
 
-        if message.content.startswith('!'):
-            if message.content == '!who':
-                yield from self.send_message(message.channel, self.description)
-                return
+        if message.content == '!help':
+            yield from self.say(
+                self.description +
+                '\nTry !help [command] if you need specific help any command')
+            return
 
         for func in self.event_callbacks['on_message']:
             yield from func(message)
