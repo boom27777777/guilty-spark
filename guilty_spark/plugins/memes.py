@@ -22,6 +22,8 @@ def on_message(message):
             ('Retune the dank emitters to include new autism\n\n{}\n\n'
              'in: trigger is anywhere in the message\n'
              'is: is exactly equal to trigger\n'
+             'Example:'
+             '!bindmeme is::kthx::bai'
              ).format(usage))
         return
 
