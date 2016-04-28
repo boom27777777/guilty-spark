@@ -2,7 +2,9 @@ import asyncio
 import yaml
 from guilty_spark.application import bot
 
-usage = 'Usage: !bindmeme [in/is]::[trigger]::[meme]'
+usage = 'Usage:\n' \
+        '\t!bindmeme [in/is]::[trigger]::[meme]\n' \
+        '\t!unbindmeme [trigger]'
 
 with open('shitpost.yml') as memes:
     dreams = yaml.load(memes)
@@ -15,7 +17,14 @@ def cache_memes():
 
 @asyncio.coroutine
 def on_message(message):
-    global dreams
+    if message.content == '!help !bindmeme':
+        yield from bot.say(
+            ('Retune the dank emitters to include new autism\n\n{}\n\n'
+             'in: trigger is anywhere in the message\n'
+             'is: is exactly equal to trigger\n'
+             ).format(usage))
+        return
+
     if '!bindmeme' in message.content:
         content = message.content.replace('!bindmeme', '')
         args = content.split('::')
@@ -33,6 +42,24 @@ def on_message(message):
         dreams['memes'][meme_type][trigger] = meme
         cache_memes()
         yield from bot.say('Meme bound')
+        return
+
+    if '!unbindmeme' in message.content:
+        content = message.content.replace('!unbindmeme', '')
+        arg = content.strip()
+
+        if arg in dreams['memes']['in']:
+            del dreams['memes']['in'][arg]
+            yield from bot.say('Meme unbound')
+            cache_memes()
+
+        elif arg in dreams['memes']['is']:
+            del dreams['memes']['is'][arg]
+            yield from bot.say('Meme unbound')
+            cache_memes()
+
+        else:
+            yield from bot.say('You have given me stale memes')
         return
 
     memes = dreams['memes']
