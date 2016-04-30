@@ -1,26 +1,30 @@
 import asyncio
 import re
+import discord
 from urllib.parse import urlencode
 
-from guilty_spark.application import bot
+from guilty_spark.plugin_system.plugin import BasePlugin
 from guilty_spark.networking import fetch_page
 
 usage = 'Usage: !youtube [search]'
 
 
-@asyncio.coroutine
-def on_message(message):
-    if message.content == '!help !youtube':
-        yield from bot.say(
+class Youtube(BasePlugin):
+    commands = ['youtube']
+
+    @asyncio.coroutine
+    def help(self):
+        yield from self.bot.say(
             'Grabs the first related youtube video for a given search \n' \
             + usage)
 
-    if '!youtube' in message.content:
+    @asyncio.coroutine
+    def on_command(self, message: discord.Message):
         if len(message.content) > 1024:
-            yield from bot.say(message.channel, 'Nope!')
+            yield from self.bot.say(message.channel, 'Nope!')
         args = message.content.split(' ')
         if len(args) < 2:
-            yield from bot.say()
+            yield from self.bot.say(usage)
             return
 
         url = 'https://www.youtube.com/results?' + urlencode(
@@ -29,5 +33,5 @@ def on_message(message):
         links = re.findall('<a href="(\/watch\?v=[^"]+)"', html.decode())
         if links:
             link = 'http://youtube.com' + links[0]
-            yield from bot.say(link)
+            yield from self.bot.say(link)
         return
