@@ -1,8 +1,8 @@
-import logging
 import asyncio
+import logging
 
 from guilty_spark.application import bot
-from guilty_spark.plugin import PluginManager
+from guilty_spark.plugin_system.manager import PluginManager
 
 
 def main():
