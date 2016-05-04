@@ -1,42 +1,45 @@
 import asyncio
-
 import discord
 import yaml
 import re
-from guilty_spark.plugin_system.plugin import BasePlugin
+
+from guilty_spark.plugin_system.data import plugin_file
+from guilty_spark.plugin_system.plugin import Plugin
 
 usage = 'Usage:\n' \
         '\t!bindmeme [in/is]::[trigger]::[meme]\n' \
         '\t!unbindmeme [trigger]'
 
 
-class Memes(BasePlugin):
+class Memes(Plugin):
     commands = ['bindmeme', 'undbindmeme']
 
     def __init__(self, bot):
         super().__init__(bot)
 
+        self.memes = {
+            'in': {},
+            'is': {},
+            're': {}
+        }
+
+        self.load_memes()
+
+    def load_memes(self):
         try:
-            with open('shitpost.yml') as memes:
-                self.dreams = yaml.load(memes)
+            with plugin_file('shitpost.yml') as memes:
+                self.memes = yaml.load(memes)
         except IOError:
-            self.dreams = {
-                'memes':
-                    {
-                        'in': {},
-                        'is': {},
-                        're': {}
-                    }
-            }
+            pass
 
     def cache_memes(self):
-        with open('shitpost.yml', 'w') as memes:
-            yaml.dump(self.dreams, memes, default_flow_style=False)
+        with open(plugin_file('shitpost.yml', 'w')) as memes:
+            yaml.dump(self.memes, memes, default_flow_style=False)
 
     def delete_meme(self, trigger: str):
-        for key in self.dreams:
-            if trigger in self.dreams[key]:
-                del self.dreams[key][trigger]
+        for key in self.memes:
+            if trigger in self.memes[key]:
+                del self.memes[key][trigger]
                 self.cache_memes()
                 return True
         return False
@@ -67,10 +70,10 @@ class Memes(BasePlugin):
             return
 
         try:
-            self.dreams[meme_type][trigger] = meme
+            self.memes[meme_type][trigger] = meme
         except KeyError:
-            self.dreams[meme_type] = {}
-            self.dreams[meme_type][trigger] = meme
+            self.memes[meme_type] = {}
+            self.memes[meme_type][trigger] = meme
 
         self.cache_memes()
         yield from self.bot.say('Meme bound')
@@ -88,15 +91,16 @@ class Memes(BasePlugin):
 
     @asyncio.coroutine
     def on_command(self, message: discord.Message):
-        if 'bindmeme' in message.content:
-            self.bind_meme(message.content)
-
         if 'unbindmeme' in message.content:
             self.unbind_meme(message.content)
 
+        if 'bindmeme' in message.content:
+            self.bind_meme(message.content)
+
+
     @asyncio.coroutine
     def on_message(self, message: discord.Message):
-        memes = self.dreams
+        memes = self.memes
         if message.content in memes['is']:
             yield from self.bot.say(memes['is'][message.content])
             return

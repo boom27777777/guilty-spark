@@ -4,7 +4,7 @@ from importlib import import_module, invalidate_caches
 
 from guilty_spark import get_resource
 from guilty_spark.bot import Monitor
-from guilty_spark.plugin_system.plugin import BasePlugin
+from guilty_spark.plugin_system.plugin import Plugin
 
 
 class PluginManager():
@@ -16,7 +16,7 @@ class PluginManager():
         objects = []
         for name in dir(module):
             item = getattr(module, name)
-            if isinstance(item, type) and issubclass(item, BasePlugin):
+            if isinstance(item, type) and issubclass(item, Plugin):
                 objects.append(item)
 
         return objects
