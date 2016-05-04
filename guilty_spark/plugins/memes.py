@@ -12,17 +12,13 @@ usage = 'Usage:\n' \
 
 
 class Memes(Plugin):
-    commands = ['bindmeme', 'undbindmeme']
-
     def __init__(self, bot):
-        super().__init__(bot)
-
+        super().__init__(bot, commands=['bindmeme', 'undbindmeme'])
         self.memes = {
             'in': {},
             'is': {},
             're': {}
         }
-
         self.load_memes()
 
     def load_memes(self):
@@ -33,7 +29,7 @@ class Memes(Plugin):
             pass
 
     def cache_memes(self):
-        with open(plugin_file('shitpost.yml', 'w')) as memes:
+        with plugin_file('shitpost.yml', 'w') as memes:
             yaml.dump(self.memes, memes, default_flow_style=False)
 
     def delete_meme(self, trigger: str):
@@ -56,7 +52,7 @@ class Memes(Plugin):
         return
 
     def bind_meme(self, content: str):
-        content = content.replace('!bindmeme', '')
+        content = content.replace(self.bot.prefix + 'bindmeme', '')
         args = content.split('::')
         if len(args) != 3:
             yield from self.bot.say(usage)
@@ -80,8 +76,11 @@ class Memes(Plugin):
         return
 
     def unbind_meme(self, content: str):
-        content = content.replace('!unbindmeme', '')
+        content = content.replace(self.bot.prefix + 'unbindmeme', '')
         arg = content.strip()
+
+        if not arg:
+            yield from self.bot.say(usage)
 
         if self.delete_meme(arg):
             yield from self.bot.say('Meme unbound')
@@ -90,13 +89,12 @@ class Memes(Plugin):
         return
 
     @asyncio.coroutine
-    def on_command(self, message: discord.Message):
-        if 'unbindmeme' in message.content:
-            self.unbind_meme(message.content)
+    def on_command(self, command, message: discord.Message):
+        if self.bot.prefix + 'bindmeme' == command:
+            yield from self.bind_meme(message.content)
 
-        if 'bindmeme' in message.content:
-            self.bind_meme(message.content)
-
+        if self.bot.prefix + 'unbindmeme' == command:
+            yield from self.unbind_meme(message.content)
 
     @asyncio.coroutine
     def on_message(self, message: discord.Message):

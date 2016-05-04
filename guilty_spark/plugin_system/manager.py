@@ -13,20 +13,18 @@ class PluginManager():
         self.plugins = {}
 
     def plugin_objects(self, module):
-        objects = []
         for name in dir(module):
             item = getattr(module, name)
             if isinstance(item, type) and issubclass(item, Plugin):
-                objects.append(item)
-
-        return objects
+                if item != Plugin:
+                    return item
 
     def load_plugin(self, name):
         module = import_module('guilty_spark.plugins.{}'.format(name))
-        plug_objs = self.plugin_objects(module)
+        plug_obj = self.plugin_objects(module)
 
-        if plug_objs:
-            self.plugins[name] = plug_objs
+        if plug_obj:
+            self.plugins[name] = plug_obj
             logging.info('Loaded plugin %s', name)
 
     def load(self):
@@ -39,6 +37,6 @@ class PluginManager():
             self.load_plugin(name)
 
     def bind(self, bot: Monitor):
-        for name, obj in self.plugins.values():
+        for name, obj in self.plugins.items():
             plugin = obj(bot)
             bot.register_plugin(name, plugin)

@@ -3,14 +3,16 @@ import re
 import discord
 from urllib.parse import urlencode
 
-from guilty_spark.plugin_system.plugin import Plugin
+from guilty_spark.bot import Monitor
 from guilty_spark.networking import fetch_page
+from guilty_spark.plugin_system.plugin import Plugin
 
 usage = 'Usage: !youtube [search]'
 
 
 class Youtube(Plugin):
-    commands = ['youtube']
+    def __init__(self, bot: Monitor):
+        super().__init__(bot, commands=['youtube'])
 
     @asyncio.coroutine
     def help(self):
@@ -19,7 +21,7 @@ class Youtube(Plugin):
             + usage)
 
     @asyncio.coroutine
-    def on_command(self, message: discord.Message):
+    def on_command(self, command, message: discord.Message):
         if len(message.content) > 1024:
             yield from self.bot.say(message.channel, 'Nope!')
         args = message.content.split(' ')
