@@ -3,13 +3,13 @@ import re
 import discord
 from urllib.parse import urlencode
 
-from guilty_spark.plugin_system.plugin import BasePlugin
+from guilty_spark.plugin_system.plugin import Plugin
 from guilty_spark.networking import fetch_page
 
 usage = 'Usage: !youtube [search]'
 
 
-class Youtube(BasePlugin):
+class Youtube(Plugin):
     commands = ['youtube']
 
     @asyncio.coroutine

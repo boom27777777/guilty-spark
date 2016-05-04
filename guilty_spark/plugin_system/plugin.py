@@ -3,10 +3,15 @@ import discord
 from guilty_spark.bot import Monitor
 
 
-class BasePlugin:
+class Plugin:
     def __init__(self, bot: Monitor):
         self.bot = bot
         self.depends = []
+
+        try:
+            getattr(self, 'commands')
+        except AttributeError:
+            self.commands = []
 
         methods = [
             ('on_message', self.on_message),
