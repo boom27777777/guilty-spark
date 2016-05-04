@@ -35,8 +35,9 @@ class Monitor(discord.Client):
                 self.callbacks[dep] = []
             self.callbacks[dep].append(obj)
 
-        for command in obj.commands:
-            self.commands[self.prefix + command] = obj
+        if obj.commands:
+            for command in obj.commands:
+                self.commands[self.prefix + command] = obj
 
     def say(self, message: str):
         if self.current_message:
@@ -82,7 +83,7 @@ class Monitor(discord.Client):
 
             for command, plugin in self.commands.items():
                 if command in message.content:
-                    yield from plugin.on_command(message)
+                    yield from plugin.on_command(command, message)
 
         for plugin in self.callbacks.setdefault('on_message', []):
             yield from plugin.on_message(message)

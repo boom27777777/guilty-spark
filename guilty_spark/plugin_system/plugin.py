@@ -4,14 +4,11 @@ from guilty_spark.bot import Monitor
 
 
 class Plugin:
-    def __init__(self, bot: Monitor):
+    def __init__(self, bot: Monitor, commands=None):
         self.bot = bot
         self.depends = []
 
-        try:
-            getattr(self, 'commands')
-        except AttributeError:
-            self.commands = []
+        self.commands = commands
 
         methods = [
             ('on_message', self.on_message),
@@ -25,7 +22,7 @@ class Plugin:
     def on_message(self, message: discord.Message):
         pass
 
-    def on_command(self, message: discord.Message):
+    def on_command(self, command, message: discord.Message):
         pass
 
     @asyncio.coroutine
