@@ -106,9 +106,7 @@ class Memes(Plugin):
         for meme, autism in memes['in'].items():
             if meme in message.content:
                 yield from self.bot.say(autism)
-                return
 
         for meme, autism in memes['re'].items():
             if re.search(meme, message.content):
                 yield from self.bot.say(autism)
-                return
