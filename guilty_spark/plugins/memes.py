@@ -64,6 +64,9 @@ class Memes(Plugin):
         if len(trigger) < 3:
             yield from self.bot.say('Trigger needs to be more then 3 characters')
             return
+        if trigger.startswith(self.bot.prefix):
+            yield from self.bot.say(
+                'Trigger can\'t begin with "{}"'.format(self.bot.prefix))
 
         try:
             self.memes[meme_type][trigger] = meme
