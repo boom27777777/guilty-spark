@@ -81,9 +81,10 @@ class Monitor(discord.Client):
 
                 return
 
+            args = message.content.split()
             for command, plugin in self.commands.items():
-                if command in message.content:
-                    yield from plugin.on_command(command, message)
+                if command == args[0]:
+                    yield from plugin.on_command(args[0], message)
 
         for plugin in self.callbacks.setdefault('on_message', []):
             yield from plugin.on_message(message)
