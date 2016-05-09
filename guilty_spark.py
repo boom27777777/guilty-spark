@@ -1,15 +1,16 @@
 import asyncio
 import logging
+from sys import argv
 
 from guilty_spark.application import bot
 from guilty_spark.plugin_system.manager import PluginManager
 
 
-def main():
+def main(log=None):
     logging.basicConfig(
         level=logging.INFO,
         format='%(asctime)s|%(levelname)s|%(message)s',
-        filename=None
+        filename='bot.log'
     )
 
     plugin_manager = PluginManager()
@@ -29,4 +30,9 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    if '--deamon' in argv or '-d' in argv:
+        import daemon
+        with daemon.DaemonContext():
+            main('bot.log')
+    else:
+        main()
