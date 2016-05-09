@@ -1,5 +1,7 @@
 import asyncio
 import logging
+
+from os.path import curdir
 from sys import argv
 
 from guilty_spark.application import bot
@@ -32,7 +34,7 @@ def main(log=None):
 if __name__ == '__main__':
     if '--daemon' in argv or '-d' in argv:
         import daemon
-        with daemon.DaemonContext():
+        with daemon.DaemonContext(working_directory=curdir()):
             main('bot.log')
     else:
         main()
