@@ -13,7 +13,7 @@ usage = 'Usage:\n' \
 
 class Memes(Plugin):
     def __init__(self, bot):
-        super().__init__(bot, commands=['bindmeme', 'undbindmeme'])
+        super().__init__(bot, commands=['bindmeme', 'unbindmeme'])
         self.memes = {
             'in': {},
             'is': {},
