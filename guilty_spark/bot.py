@@ -64,6 +64,9 @@ class Monitor(discord.Client):
             if '!help' in message.content:
                 args = message.content.split()
                 if len(args) == 1 or len(args) > 2:
+                    yield from self.say('The commands I know are:')
+                    for command in self.commands:
+                        yield from self.say(command)
                     yield from self.say(
                         self.description +
                         '\nTry !help [command] if you need specific help any command')
