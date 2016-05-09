@@ -30,7 +30,7 @@ def main(log=None):
 
 
 if __name__ == '__main__':
-    if '--deamon' in argv or '-d' in argv:
+    if '--daemon' in argv or '-d' in argv:
         import daemon
         with daemon.DaemonContext():
             main('bot.log')
