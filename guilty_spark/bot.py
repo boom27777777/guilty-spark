@@ -12,6 +12,8 @@ class Monitor(discord.Client):
         self.commands = {}
         self.description = 'I am the Monitor of Installation 04. ' \
                            'I am 343 Guilty Spark'
+        self.help_message = self.description + \
+            '\nTry !help [command] if you need specific help any command'
 
         if not os.path.exists(settings_file):
             print('No settings file found, making one for you now.')
@@ -64,12 +66,9 @@ class Monitor(discord.Client):
             if '!help' in message.content:
                 args = message.content.split()
                 if len(args) == 1 or len(args) > 2:
-                    yield from self.say('The commands I know are:')
-                    for command in self.commands:
-                        yield from self.say(command)
-                    yield from self.say(
-                        self.description +
-                        '\nTry !help [command] if you need specific help any command')
+                    commands = '\n\nThe commands I know are:\n\t'
+                    commands += '\n\t'.join([c for c in self.commands])
+                    yield from self.say(self.help_message + commands)
                 else:
                     command = args[1]
                     if not command.startswith(self.prefix):
