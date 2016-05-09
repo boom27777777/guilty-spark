@@ -10,7 +10,7 @@ def main(log=None):
     logging.basicConfig(
         level=logging.INFO,
         format='%(asctime)s|%(levelname)s|%(message)s',
-        filename='bot.log'
+        filename=log
     )
 
     plugin_manager = PluginManager()
