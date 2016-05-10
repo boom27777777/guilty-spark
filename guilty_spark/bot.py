@@ -81,7 +81,7 @@ class Monitor(discord.Client):
                         yield from self.say("I'm not familiar with that "
                                             "command, curious")
 
-                return
+            return
 
             args = message.content.split()
             for command, plugin in self.commands.items():
