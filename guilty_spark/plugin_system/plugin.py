@@ -18,7 +18,6 @@ class Plugin:
             if asyncio.iscoroutinefunction(method):
                 self.depends.append(dep)
 
-
     def on_message(self, message: discord.Message):
         pass
 
