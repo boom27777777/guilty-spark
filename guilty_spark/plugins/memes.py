@@ -14,23 +14,32 @@ usage = 'Usage:\n' \
 class Memes(Plugin):
     def __init__(self, bot):
         super().__init__(bot, commands=['bindmeme', 'unbindmeme'])
-        self.memes = {
-            'in': {},
-            'is': {},
-            're': {}
-        }
+        self._memes = {}
+        self.server_id = 0
         self.load_memes()
+
+    @property
+    def memes(self):
+        try:
+            return self._memes[self.server_id]
+        except KeyError:
+            self._memes[self.server_id] = {
+                'in': {},
+                'is': {},
+                're': {}
+            }
+            return self._memes[self.server_id]
 
     def load_memes(self):
         try:
             with plugin_file('shitpost.yml') as memes:
-                self.memes = yaml.load(memes)
+                self._memes = yaml.load(memes)
         except IOError:
             pass
 
     def cache_memes(self):
         with plugin_file('shitpost.yml', 'w') as memes:
-            yaml.dump(self.memes, memes, default_flow_style=False)
+            yaml.dump(self._memes, memes, default_flow_style=False)
 
     def delete_meme(self, trigger: str):
         for key in self.memes:
@@ -101,6 +110,7 @@ class Memes(Plugin):
 
     @asyncio.coroutine
     def on_message(self, message: discord.Message):
+        self.server_id = message.channel.id
         memes = self.memes
         if message.content in memes['is']:
             yield from self.bot.say(memes['is'][message.content])
