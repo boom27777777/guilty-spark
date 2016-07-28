@@ -87,6 +87,7 @@ class Monitor(discord.Client):
             for command, plugin in self.commands.items():
                 if command == args[0]:
                     yield from plugin.on_command(args[0], message)
+            return
 
         for plugin in self.callbacks.setdefault('on_message', []):
             yield from plugin.on_message(message)
