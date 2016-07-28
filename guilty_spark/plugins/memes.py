@@ -110,7 +110,11 @@ class Memes(Plugin):
 
     @asyncio.coroutine
     def on_message(self, message: discord.Message):
-        self.server_id = message.channel.id
+        if message.server:
+            self.server_id = message.server.id
+        else:
+            self.server_id = message.channel.id
+
         memes = self.memes
         if message.content in memes['is']:
             yield from self.bot.say(memes['is'][message.content])
