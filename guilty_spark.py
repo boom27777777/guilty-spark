@@ -18,6 +18,7 @@ def main(log=None):
         filename=log
     )
 
+    # Setup and Bind plugin manager to our bot instance
     plugin_manager = PluginManager()
     plugin_manager.load()
     plugin_manager.bind(bot)
