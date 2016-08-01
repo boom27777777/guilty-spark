@@ -86,6 +86,14 @@ class Monitor(discord.Client):
         if self.current_message:
             yield from self.send_message(self.current_message.channel, message)
 
+    def code(self, message: str):
+        """ Wrap a **bot.say()** message in a code block
+
+        :param message:
+            The code to send
+        """
+        yield from self.say('```{}```'.format(message))
+
     @asyncio.coroutine
     def on_ready(self):
         """ |coro|
