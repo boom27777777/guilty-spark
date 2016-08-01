@@ -13,7 +13,7 @@ usage = 'Usage:\n' \
 
 class Memes(Plugin):
     def __init__(self, bot):
-        super().__init__(bot, commands=['bindmeme', 'unbindmeme'])
+        super().__init__(bot, commands=['bindmeme', 'unbindmeme', 'listmemes'])
         self._memes = {}
         self.server_id = 0
         self.load_memes()
@@ -51,12 +51,16 @@ class Memes(Plugin):
 
     def help(self):
         yield from self.bot.say(
-            ('Retune the dank emitters to include new autism\n\n{}\n\n'
+            ('```Retune the dank emitters to include new autism\n\n{}\n\n'
              'in: trigger is anywhere in the message\n'
              'is: is exactly equal to trigger\n'
-             're: RegEx matching\n'
+             're: RegEx matching\n\n'
+             'I also support various tags you can use:\n'
+             '<user>    | The user that triggered the message\n'
+             '<channel> | The channel the message was triggered in\n'
+             '<server>  | The server the message was triggered in\n'
              'Example:\n'
-             '\t!bindmeme is::kthx::bai'
+             '\t!bindmeme is::kthx::bai <user>```'
              ).format(usage))
         return
 
@@ -100,30 +104,70 @@ class Memes(Plugin):
             yield from self.bot.say('You have given me stale memes')
         return
 
-    @asyncio.coroutine
-    def on_command(self, command, message: discord.Message):
-        if self.bot.prefix + 'bindmeme' == command:
-            yield from self.bind_meme(message.content)
+    def list_memes(self):
+        memes = yaml.dump(self.memes, default_flow_style=False)
 
-        if self.bot.prefix + 'unbindmeme' == command:
-            yield from self.unbind_meme(message.content)
+        links = re.findall(r'[^<](http[^ \n]+)', memes)
 
-    @asyncio.coroutine
-    def on_message(self, message: discord.Message):
+        replaced = []
+        for link in links:
+            if link not in replaced:
+                memes = memes.replace(link, '<{}>'.format(link))
+            replaced.append(link)
+
+        yield from self.bot.say('```{}```'.format(memes))
+
+    def format_tag(self, autism: str, message: discord.Message):
+        if '<user>' in autism:
+            autism = autism.replace('<user>', message.author.display_name)
+
+        if '<channel>' in autism:
+            autism = autism.replace('<channel>', str(message.channel))
+
+        if '<server>' in autism:
+            autism = autism.replace('<server>', str(message.server))
+
+        return autism
+
+    def set_server_id(self, message: discord.Message):
         if message.server:
             self.server_id = message.server.id
         else:
             self.server_id = message.channel.id
 
+    @asyncio.coroutine
+    def on_command(self, command, message: discord.Message):
+        self.set_server_id(message)
+        command = command[1:]
+        if 'bindmeme' == command:
+            yield from self.bind_meme(message.content)
+
+        if 'unbindmeme' == command:
+            yield from self.unbind_meme(message.content)
+
+        if 'listmemes' == command:
+            yield from self.list_memes()
+
+    @asyncio.coroutine
+    def on_message(self, message: discord.Message):
+        self.set_server_id(message)
+
         memes = self.memes
+        dank = None
         if message.content in memes['is']:
-            yield from self.bot.say(memes['is'][message.content])
-            return
+            dank = memes['is'][message.content]
 
-        for meme, autism in memes['in'].items():
-            if meme in message.content:
-                yield from self.bot.say(autism)
+        else:
+            for meme, autism in memes['in'].items():
+                if meme in message.content:
+                    dank = autism
 
-        for meme, autism in memes['re'].items():
-            if re.search(meme, message.content):
-                yield from self.bot.say(autism)
+            for meme, autism in memes['re'].items():
+                if re.search(meme, message.content):
+                    dank = autism
+
+        if dank:
+            if re.search(r'<(user|channel|server)>', dank):
+                dank = self.format_tag(dank, message)
+
+            yield from self.bot.say(dank)
