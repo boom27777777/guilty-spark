@@ -169,8 +169,11 @@ class Memes(Plugin):
                     dank = autism
 
             for meme, autism in memes['re'].items():
-                if re.search(meme, message.content):
-                    dank = autism
+                try:
+                    if re.search(meme, message.content):
+                        dank = autism
+                except:
+                    self.delete_meme(meme)
 
         if dank:
             if re.search(r'<(user|channel|server)>', dank):
