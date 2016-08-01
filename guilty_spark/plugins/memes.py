@@ -116,7 +116,15 @@ class Memes(Plugin):
                 memes = memes.replace(link, '<{}>'.format(link))
             replaced.append(link)
 
-        yield from self.bot.say('```{}```'.format(memes))
+        if len(memes) > 2000:
+            index = 0
+            while len(memes) - index > 2000:
+                chunk = memes[index: index + 2000]
+                yield from self.bot.code(chunk)
+                index += 2000
+            yield from self.bot.code(memes[index:])
+        else:
+            yield from self.bot.code(memes)
 
     def format_tag(self, autism: str, message: discord.Message):
         if '<user>' in autism:
