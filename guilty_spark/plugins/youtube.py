@@ -16,7 +16,7 @@ class Youtube(Plugin):
 
     @asyncio.coroutine
     def help(self):
-        yield from self.bot.say(
+        yield from self.bot.code(
             'Grabs the first related youtube video for a given search \n'
             + usage)
 
