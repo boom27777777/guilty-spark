@@ -8,7 +8,8 @@ from guilty_spark.plugin_system.plugin import Plugin
 
 usage = 'Usage:\n' \
         '\t!bindmeme [in/is]::[trigger]::[meme]\n' \
-        '\t!unbindmeme [trigger]'
+        '\t!unbindmeme [trigger]\n' \
+        '\t!listmemes'
 
 
 class Memes(Plugin):
