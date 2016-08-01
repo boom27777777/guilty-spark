@@ -116,8 +116,9 @@ class Memes(Plugin):
                 memes = memes.replace(link, '<{}>'.format(link))
             replaced.append(link)
 
-        if len(memes) > 2000:
-            parts = [memes[i:i+2000] for i in range(0, len(memes), 2000)]
+        limit = 1996
+        if len(memes) > limit:
+            parts = [memes[i:i+limit] for i in range(0, len(memes), limit)]
             for part in parts:
                 yield from self.bot.code(part)
         else:
