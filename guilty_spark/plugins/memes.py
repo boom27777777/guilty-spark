@@ -117,12 +117,9 @@ class Memes(Plugin):
             replaced.append(link)
 
         if len(memes) > 2000:
-            index = 0
-            while len(memes) - index > 2000:
-                chunk = memes[index: index + 2000]
-                yield from self.bot.code(chunk)
-                index += 2000
-            yield from self.bot.code(memes[index:])
+            parts = [memes[i:i+2000] for i in range(0, len(memes), 2000)]
+            for part in parts:
+                yield from self.bot.code(part)
         else:
             yield from self.bot.code(memes)
 
