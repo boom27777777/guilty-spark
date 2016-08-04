@@ -2,7 +2,7 @@ import logging
 import urllib.request as requests
 
 
-def fetch_page(url, method='GET', data=None, headers=None):
+def fetch_page(url, method='GET', data=None):
     """ Builds a request as the bot to request anything through HTTP
 
     :param url:
@@ -18,8 +18,7 @@ def fetch_page(url, method='GET', data=None, headers=None):
     """
     content = None
     try:
-        request = requests.Request(url, method=method, data=data,
-                                   headers=headers)
+        request = requests.Request(url, method=method, data=data)
 
         opener = requests.build_opener()
         request.add_header(
