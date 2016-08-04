@@ -38,7 +38,12 @@ class PluginManager:
             The name to import
         """
 
-        module = import_module('plugins.{}'.format(name))
+        try:
+            module = import_module('plugins.{}'.format(name))
+        except:
+            logging.error('Failed to load plugin %s', name)
+            return
+
         plug_obj = self.plugin_objects(module)
 
         if plug_obj:
@@ -68,5 +73,5 @@ class PluginManager:
             The Monitor object to bind to
         """
         for name, obj in self.plugins.items():
-            plugin = obj(bot)
-            bot.register_plugin(name, plugin)
+            plugin = obj(name, bot)
+            bot.register_plugin(plugin)

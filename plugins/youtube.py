@@ -11,8 +11,8 @@ usage = 'Usage: !youtube [search]'
 
 
 class Youtube(Plugin):
-    def __init__(self, bot: Monitor):
-        super().__init__(bot, commands=['youtube'])
+    def __init__(self, name, bot: Monitor):
+        super().__init__(name, bot, commands=['youtube'])
 
     @asyncio.coroutine
     def help(self):
