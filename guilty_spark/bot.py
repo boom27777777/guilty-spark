@@ -1,8 +1,8 @@
-import discord
-import yaml
 import asyncio
+import discord
 import logging
-import os
+
+from guilty_spark import config
 
 
 class Monitor(discord.Client):
@@ -30,17 +30,8 @@ class Monitor(discord.Client):
         self.help_message = self.description + \
             '\nTry !help [command] if you need specific help any command'
 
-        # Attempt to load a settings file, making a new default one
-        # if it's not found
-        if not os.path.exists(settings_file):
-            print('No settings file found, making one for you now.')
-            with open(settings_file, 'w') as settings:
-                yaml.dump({'owner': '', 'token': '', 'command_prefix': '!'},
-                          settings, default_flow_style=False)
-            raise IOError
-
-        with open(settings_file) as settings:
-            self.settings = yaml.load(settings)
+        #
+        self.settings = config.load_config(settings_file)
 
         self.prefix = self.settings['command_prefix']
         self.current_message = None
