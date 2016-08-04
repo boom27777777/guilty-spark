@@ -4,7 +4,7 @@ import logging
 
 import guilty_spark.config as config
 from guilty_spark.util import slice_message, cap_message
-from guilty_spark.plugin_system.handler import Handler
+
 
 class Monitor(discord.Client):
     """The main subclass of the Discord client"""
@@ -53,18 +53,17 @@ class Monitor(discord.Client):
             The new **guilty_spark.plugin_system.plugin.Plugin** Subclass to
             bind
         """
-        handler = Handler(obj)
         for dep in obj.depends:
             if dep not in self.callbacks:
                 self.callbacks[dep] = []
-            self.callbacks[dep].append(handler)
+            self.callbacks[dep].append(obj)
 
         if obj.commands:
             for command in obj.commands:
                 # TODO Add some kind of command collision handling
-                self.commands[self.prefix + command] = handler
+                self.commands[self.prefix + command] = obj
 
-        self.plugins[obj.name] = handler
+        self.plugins[obj.name] = obj
 
     def send_message(self, destination, content, *args, tts=False, **kwargs):
         """ Sends message through the discord api
@@ -189,9 +188,9 @@ class Monitor(discord.Client):
             args = message.content.split()
             for command, plugin in self.commands.items():
                 if command == args[0]:
-                    yield from plugin.on_command(args[0], message)
+                    yield from plugin.pre_command(args[0], message)
             return
 
         # Run all on_message hooks
         for plugin in self.callbacks.setdefault('on_message', []):
-            yield from plugin.on_message(message)
+            yield from plugin.pre_message(message)
