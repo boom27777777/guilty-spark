@@ -4,7 +4,7 @@
 # Reference: https://intellij-support.jetbrains.com/hc/en-us/articles/206544839
 
 settings.yml
-guilty_spark/plugin_data/shitpost.yml
+guilty_spark/plugin_data/*.*
 
 # User-specific stuff:
 .idea/workspace.xml
