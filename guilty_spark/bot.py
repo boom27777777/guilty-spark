@@ -178,7 +178,7 @@ class Monitor(discord.Client):
 
             # Special logic for a !help command
             if message.content.startswith(self.prefix + 'help'):
-                self.help(message)
+                yield from self.help(message)
                 return
 
             # Test our available commands for a matching signature and pass
