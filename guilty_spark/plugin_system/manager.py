@@ -12,7 +12,7 @@ class PluginManager:
 
     def __init__(self):
         """ Initializes a new plugin manager with the base plugin directory """
-        self.plugin_dir = get_resource('plugins')
+        self.plugin_dir = 'plugins'
         self.plugins = {}
 
     @staticmethod
@@ -38,7 +38,7 @@ class PluginManager:
             The name to import
         """
 
-        module = import_module('guilty_spark.plugins.{}'.format(name))
+        module = import_module('plugins.{}'.format(name))
         plug_obj = self.plugin_objects(module)
 
         if plug_obj:
