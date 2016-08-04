@@ -11,8 +11,6 @@ def fetch_page(url, method='GET', data=None):
         Http method to use
     :param data:
         Data for POST
-    :param headers:
-        HTTP Headers for a urllib.request.Request object
     :return:
         Response content or None if an error occurs
     """
