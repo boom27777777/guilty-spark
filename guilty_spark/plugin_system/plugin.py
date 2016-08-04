@@ -6,7 +6,7 @@ from guilty_spark.bot import Monitor
 class Plugin:
     """ Base plugin class """
 
-    def __init__(self, bot: Monitor, commands=None):
+    def __init__(self, name: str, bot: Monitor, commands=None):
         """ Set's up the plugin's base resources
 
             Walks the Subclass's structure and search for any hooks
@@ -18,6 +18,7 @@ class Plugin:
             A list of command strings to respond to if on_command is hooked
         """
 
+        self.name = name
         self.bot = bot
         self.depends = []
 
@@ -42,3 +43,6 @@ class Plugin:
     @asyncio.coroutine
     def help(self):
         yield from self.bot.say("Help hasn't been added for this command yet")
+
+    def __repr__(self):
+        return self.name

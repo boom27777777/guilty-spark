@@ -13,8 +13,10 @@ usage = 'Usage:\n' \
 
 
 class Memes(Plugin):
-    def __init__(self, bot):
-        super().__init__(bot, commands=['bindmeme', 'unbindmeme', 'listmemes'])
+    def __init__(self, name, bot):
+        super().__init__(
+            name, bot, commands=['bindmeme', 'unbindmeme', 'listmemes']
+        )
         self._memes = {}
         self.server_id = 0
         self.load_memes()

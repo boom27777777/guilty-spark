@@ -4,7 +4,7 @@ import logging
 
 import guilty_spark.config as config
 from guilty_spark.util import slice_message, cap_message
-
+from guilty_spark.plugin_system.handler import Handler
 
 class Monitor(discord.Client):
     """The main subclass of the Discord client"""
@@ -25,6 +25,7 @@ class Monitor(discord.Client):
 
         self.callbacks = {}
         self.commands = {}
+        self.plugins = {}
         self.description = 'I am the Monitor of Installation 04. ' \
                            'I am 343 Guilty Spark'
 
@@ -42,28 +43,28 @@ class Monitor(discord.Client):
 
         yield from super().login(self.settings['token'])
 
-    def register_plugin(self, name: str, obj):
+    def register_plugin(self, obj):
         """ Bind a new plugin to the bot
 
             Also walks the plugin dependinces to avoid having to iterate
             through the entire discord api on every event.
 
-        :param name:
-            Plugin name (Deprecated)
         :param obj:
             The new **guilty_spark.plugin_system.plugin.Plugin** Subclass to
             bind
         """
-
+        handler = Handler(obj)
         for dep in obj.depends:
             if dep not in self.callbacks:
                 self.callbacks[dep] = []
-            self.callbacks[dep].append(obj)
+            self.callbacks[dep].append(handler)
 
         if obj.commands:
             for command in obj.commands:
                 # TODO Add some kind of command collision handling
-                self.commands[self.prefix + command] = obj
+                self.commands[self.prefix + command] = handler
+
+        self.plugins[obj.name] = handler
 
     def send_message(self, destination, content, *args, tts=False, **kwargs):
         """ Sends message through the discord api
@@ -112,7 +113,7 @@ class Monitor(discord.Client):
             The code to send
         """
 
-        yield from self.say(message, ends='```')
+        yield from self.say('\n' + message, ends='```')
 
     def help(self, message: discord.Message):
         """ Prints the relevant help information

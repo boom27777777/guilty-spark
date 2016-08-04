@@ -19,8 +19,8 @@ usage = 'Usage: !gif [search]'
 
 
 class Gif(Plugin):
-    def __init__(self, bot: Monitor):
-        super().__init__(bot, commands=['gif'])
+    def __init__(self, name, bot: Monitor):
+        super().__init__(name, bot, commands=['gif'])
 
     @asyncio.coroutine
     def help(self):
