@@ -2,7 +2,8 @@ import asyncio
 import discord
 import logging
 
-from guilty_spark import config
+import guilty_spark.config as config
+from guilty_spark.util import slice_message, cap_message
 
 
 class Monitor(discord.Client):
@@ -64,18 +65,45 @@ class Monitor(discord.Client):
                 # TODO Add some kind of command collision handling
                 self.commands[self.prefix + command] = obj
 
-    def say(self, message: str):
+    def send_message(self, destination, content, *args, tts=False, **kwargs):
+        """ Sends message through the discord api
+
+            This method will split up messages longer then the character_max
+            setting in the config
+
+        :param kwargs:
+            :key: "ends" what to wrap each message in
+        """
+
+        limit = self.settings['character_limit']
+        if len(content) > limit:
+            parts = slice_message(
+                limit, content, kwargs.setdefault('ends', ''))
+
+            for part in parts:
+                yield from super().send_message(
+                    destination, part, *args, tts=tts)
+
+        else:
+            content = cap_message(content, kwargs.setdefault('ends', ''))
+            yield from super().send_message(
+                destination, content, *args, tts=tts)
+
+    def say(self, message: str, ends=''):
         """ Return a context dependant message
 
             Checks the bot's current message property and sends a message back
             to the originating channel
 
+        :param ends:
+            String to wrap a message in (IE * -> *text*)
         :param message:
             The text to send
         """
 
         if self.current_message:
-            yield from self.send_message(self.current_message.channel, message)
+            yield from self.send_message(
+                self.current_message.channel, message, ends=ends)
 
     def code(self, message: str):
         """ Wrap a **bot.say()** message in a code block
@@ -83,7 +111,8 @@ class Monitor(discord.Client):
         :param message:
             The code to send
         """
-        yield from self.say('```{}```'.format(message))
+
+        yield from self.say(message, ends='```')
 
     @asyncio.coroutine
     def on_ready(self):
