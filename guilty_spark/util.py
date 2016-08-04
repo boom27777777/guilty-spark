@@ -17,10 +17,10 @@ def cap_message(msg, ends=''):
     """
 
     if ends and not msg.startswith(ends):
-        msg += ends
-
-    elif ends and not msg.endswith(ends):
         msg = ends + msg
+
+    if ends and not msg.endswith(ends):
+        msg += ends
 
     return msg
 

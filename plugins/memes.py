@@ -116,13 +116,7 @@ class Memes(Plugin):
                 memes = memes.replace(link, '<{}>'.format(link))
             replaced.append(link)
 
-        limit = 1996
-        if len(memes) > limit:
-            parts = [memes[i:i+limit] for i in range(0, len(memes), limit)]
-            for part in parts:
-                yield from self.bot.code(part)
-        else:
-            yield from self.bot.code(memes)
+        yield from self.bot.code(memes)
 
     def format_tag(self, autism: str, message: discord.Message):
         if '<user>' in autism:

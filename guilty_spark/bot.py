@@ -114,6 +114,29 @@ class Monitor(discord.Client):
 
         yield from self.say(message, ends='```')
 
+    def help(self, message: discord.Message):
+        """ Prints the relevant help information
+
+        :param message:
+            The message to respond to
+        """
+        args = message.content.split()
+        if len(args) == 1 or len(args) > 2:
+            commands = '\n\nThe commands I know are:\n\t'
+            commands += '\n\t'.join([c for c in self.commands])
+            yield from self.code(self.help_message + commands)
+        else:
+            command = args[1]
+            if not command.startswith(self.prefix):
+                command = self.prefix + command
+
+            if command in self.commands:
+                yield from self.commands[command].help()
+
+            else:
+                yield from self.say("I'm not familiar with that "
+                                    "command, curious")
+
     @asyncio.coroutine
     def on_ready(self):
         """ |coro|
@@ -154,24 +177,8 @@ class Monitor(discord.Client):
         if message.content.startswith(self.prefix):
 
             # Special logic for a !help command
-            if '!help' in message.content:
-                args = message.content.split()
-                if len(args) == 1 or len(args) > 2:
-                    commands = '\n\nThe commands I know are:\n\t'
-                    commands += '\n\t'.join([c for c in self.commands])
-                    yield from self.code(self.help_message + commands)
-                else:
-                    command = args[1]
-                    if not command.startswith(self.prefix):
-                        command = self.prefix + command
-
-                    if command in self.commands:
-                        yield from self.commands[command].help()
-
-                    else:
-                        yield from self.say("I'm not familiar with that "
-                                            "command, curious")
-
+            if message.content.startswith(self.prefix + 'help'):
+                self.help(message)
                 return
 
             # Test our available commands for a matching signature and pass
