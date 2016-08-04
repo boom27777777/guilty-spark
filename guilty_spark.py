@@ -1,9 +1,6 @@
 import asyncio
 import logging
 
-from os.path import curdir, join
-from sys import argv
-
 from guilty_spark.application import bot
 from guilty_spark.plugin_system.manager import PluginManager
 
