@@ -38,11 +38,17 @@ class Gif(Plugin):
             yield from self.bot.say(usage)
             return
 
-        url = 'http://api.giphy.com/v1/gifs/search?' + urlencode(
-            [('q', '+'.join(args[1:]))]) + '&api_key=dc6zaTOxFJmzC'
+        url = 'http://api.giphy.com/v1/gifs/search?' + \
+              urlencode([('q', '+'.join(args[1:]))]) + \
+              '&api_key=dc6zaTOxFJmzC'
+
         blob = fetch_page(url)
         data = json.loads(blob.decode())
         gifs = data['data']
-        gif_id = randint(0, len(gifs) - 1)
-        gif = gifs[gif_id]['images']['downsized_medium']['url']
-        yield from self.bot.say(gif)
+
+        if len(gifs) > 0:
+            gif_id = randint(0, len(gifs) - 1)
+            gif = gifs[gif_id]['images']['downsized_medium']['url']
+            yield from self.bot.say(gif)
+        else:
+            yield from self.bot.say('No gifs found, today is a sad day.')
