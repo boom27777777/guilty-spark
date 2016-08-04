@@ -123,8 +123,10 @@ class Monitor(discord.Client):
         """
         args = message.content.split()
         if len(args) == 1 or len(args) > 2:
-            commands = '\n\nThe commands I know are:\n\t'
-            commands += '\n\t'.join([c for c in self.commands])
+            commands = '\n\nThe commands available are:\n\t'
+            commands += '\n\t'.join(
+                [c for c, p in self.commands.items() if p.enabled]
+            )
             yield from self.code(self.help_message + commands)
         else:
             command = args[1]
