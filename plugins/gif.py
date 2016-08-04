@@ -6,7 +6,6 @@
 """
 
 import asyncio
-import re
 import discord
 import json
 from random import randint
