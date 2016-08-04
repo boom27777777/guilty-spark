@@ -14,7 +14,3 @@ Required libraries
 ------------------
 - discord python api
 - PyYaml
-
-
-(Optional)
-- python-daemon (for -d --daemon)
