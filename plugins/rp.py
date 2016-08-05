@@ -36,8 +36,8 @@ class RP(Plugin):
         self.cache_session()
 
     def upload_log(self, channel: discord.Channel):
-        with plugin_file(channel.id + '.txt') as log:
-            yield from self.bot.send_file(channel, log)
+        with plugin_file(channel.id + '.txt', mode='rb') as log:
+            yield from self.bot.send_file(channel, log, )
 
     @asyncio.coroutine
     def help(self):
@@ -79,3 +79,4 @@ class RP(Plugin):
                     message.author.display_name,
                     message.content
                 ))
+            self.sessions[message.channel.id].flush()
