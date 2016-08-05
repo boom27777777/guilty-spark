@@ -19,6 +19,8 @@ class RP(Plugin):
         self.cache_file = 'rp.yml'
 
         self.sessions = load_yml(self.cache_file, empty={})
+        for session in self.sessions:
+            self.start_session(session)
 
     def cache_session(self):
         cache_yml(self.cache_file, self.sessions)
