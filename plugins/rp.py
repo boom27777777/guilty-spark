@@ -9,20 +9,28 @@ import discord
 
 from guilty_spark.bot import Monitor
 from guilty_spark.plugin_system.plugin import Plugin
-from guilty_spark.plugin_system.data import plugin_file
+from guilty_spark.plugin_system.data import plugin_file, cache_yml, load_yml
 
 
 class RP(Plugin):
     def __init__(self, name: str, bot: Monitor):
         super().__init__(name, bot, commands=['rp'])
         self.usage = self.bot.prefix + 'rp [record|report]'
-        self.sessions = {}
+        self.cache_file = 'rp.yml'
+
+        self.sessions = load_yml(self.cache_file, empty={})
+
+    def cache_session(self):
+        cache_yml(self.cache_file, self.sessions)
 
     def start_session(self, channel_id: str):
         self.sessions[channel_id] = plugin_file(channel_id + '.txt', 'a')
+        self.cache_session()
 
     def stop_session(self, channel_id: str):
         self.sessions[channel_id].close()
+        del self.sessions[channel_id]
+        self.cache_session()
 
     def upload_log(self, channel: discord.Channel):
         with plugin_file(channel.id + '.txt') as log:
