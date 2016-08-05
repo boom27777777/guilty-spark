@@ -17,7 +17,7 @@ def plugin_file(name: str, mode: str='r'):
     return open(get_resource('plugin_data', name), mode)
 
 
-def cache_yml(cache_path: str, data: dict):
+def cache_yml(cache_path: str, data):
     with plugin_file(cache_path, 'w') as cache:
         yaml.dump(data, cache)
 

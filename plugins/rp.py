@@ -17,13 +17,14 @@ class RP(Plugin):
         super().__init__(name, bot, commands=['rp'])
         self.usage = self.bot.prefix + 'rp [record|report]'
         self.cache_file = 'rp.yml'
+        self.sessions = {}
 
-        self.sessions = load_yml(self.cache_file, empty={})
-        for session in self.sessions:
+        for session in load_yml(self.cache_file, empty=[]):
             self.start_session(session)
 
     def cache_session(self):
-        cache_yml(self.cache_file, self.sessions)
+        cache = [k for k in self.sessions.keys()]
+        cache_yml(self.cache_file, cache)
 
     def start_session(self, channel_id: str):
         self.sessions[channel_id] = plugin_file(channel_id + '.txt', 'a')
