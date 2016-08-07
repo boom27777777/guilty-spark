@@ -24,10 +24,22 @@ class Help(Plugin):
         """
         args = message.content.split()
         if len(args) == 1 or len(args) > 2:
+            longest = max([len(p) for p in self.bot.plugins])
+            name_fmt = '\n  {{:>{}}}: '.format(longest)
+            padding = '\n' + ' ' * (longest + 4)
+            plugins = sorted(self.bot.plugins.items(), key=lambda x: x[0])
+
             commands = '\n\nThe commands available are:\n\t'
-            commands += '\n\t'.join(
-                [c for c, p in self.bot.commands.items() if p.enabled]
-            )
+            commands += name_fmt.format('Plugin') + 'Command\n'
+            commands += '-' * int(longest * 2.5)
+            for name, plugin in plugins:
+                if not plugin.commands:
+                    continue
+
+                commands += name_fmt.format(name.title())
+                commands += padding.join(
+                    [self.bot.prefix + c for c in plugin.commands])
+
             yield from self.bot.code(self.bot.help_message + commands)
         else:
             command = args[1]
