@@ -114,31 +114,6 @@ class Monitor(discord.Client):
 
         yield from self.say('\n' + message, ends='```')
 
-    def help(self, message: discord.Message):
-        """ Prints the relevant help information
-
-        :param message:
-            The message to respond to
-        """
-        args = message.content.split()
-        if len(args) == 1 or len(args) > 2:
-            commands = '\n\nThe commands available are:\n\t'
-            commands += '\n\t'.join(
-                [c for c, p in self.commands.items() if p.enabled]
-            )
-            yield from self.code(self.help_message + commands)
-        else:
-            command = args[1]
-            if not command.startswith(self.prefix):
-                command = self.prefix + command
-
-            if command in self.commands:
-                yield from self.commands[command].help()
-
-            else:
-                yield from self.say("I'm not familiar with that "
-                                    "command, curious")
-
     @asyncio.coroutine
     def on_ready(self):
         """ |coro|
@@ -177,11 +152,6 @@ class Monitor(discord.Client):
 
         # Parse the message for our command character
         if message.content.startswith(self.prefix):
-
-            # Special logic for a !help command
-            if message.content.startswith(self.prefix + 'help'):
-                yield from self.help(message)
-                return
 
             # Test our available commands for a matching signature and pass
             # the message onto the appropriate plugin on_command hook
