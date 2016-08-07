@@ -107,14 +107,16 @@ class Monitor(discord.Client):
             yield from self.send_message(
                 self.current_message.channel, message, ends=ends)
 
-    def code(self, message: str):
+    def code(self, message: str, language=''):
         """ Wrap a **bot.say()** message in a code block
 
         :param message:
             The code to send
+        :param language:
+            The language of the given code
         """
 
-        yield from self.say('\n' + message, ends='```')
+        yield from self.say(language + '\n' + message, ends='```')
 
     @asyncio.coroutine
     def on_ready(self):
