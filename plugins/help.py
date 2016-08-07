@@ -40,7 +40,8 @@ class Help(Plugin):
                 commands += padding.join(
                     [self.bot.prefix + c for c in plugin.commands])
 
-            yield from self.bot.code(self.bot.help_message + commands)
+            yield from self.bot.code(self.bot.help_message + commands,
+                                     language='css')
         else:
             command = args[1]
 
