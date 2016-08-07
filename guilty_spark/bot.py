@@ -1,4 +1,6 @@
 import asyncio
+
+import datetime
 import discord
 import logging
 
@@ -149,6 +151,18 @@ class Monitor(discord.Client):
 
         logging.info('Connected as %s(%s)', self.user.name, self.user.id)
 
+    def call_hooks(self, dep: str, *args, **kwargs):
+        """
+
+            Iterates through the attached plugins and calls any plugin
+            with the relevant hooks
+
+        :param dep:
+            The dependency to test for
+        """
+        for plugin in self.callbacks.setdefault(dep, []):
+            yield from getattr(plugin, dep)(*args, **kwargs)
+
     @asyncio.coroutine
     def on_message(self, message: discord.Message):
         """ |coro|
@@ -188,9 +202,122 @@ class Monitor(discord.Client):
             args = message.content.split()
             for command, plugin in self.commands.items():
                 if command == args[0]:
-                    yield from plugin.pre_command(args[0], message)
+                    yield from plugin.on_command(args[0], message)
             return
 
         # Run all on_message hooks
-        for plugin in self.callbacks.setdefault('on_message', []):
-            yield from plugin.pre_message(message)
+        yield from self.call_hooks('on_message', message)
+
+    @asyncio.coroutine
+    def on_message_delete(self, message: discord.Message):
+        """ on_message_delete discord.py hook """
+        yield from self.call_hooks('on_message_delete', message)
+
+    @asyncio.coroutine
+    def on_message_edit(self, before: discord.Message, after: discord.Message):
+        """ on_message_edit discord.py hook """
+        yield from self.call_hooks('on_message_edit', before, after)
+
+    @asyncio.coroutine
+    def on_channel_delete(self, channel: discord.Channel):
+        """ on_channel_delete discord.py hook """
+        yield from self.call_hooks('on_channel_delete', channel)
+
+    @asyncio.coroutine
+    def on_channel_create(self, channel: discord.Channel):
+        """ on_channel_create discord.py hook """
+        yield from self.call_hooks('on_channel_create', channel)
+
+    @asyncio.coroutine
+    def on_channel_update(self, before: discord.Channel,
+                          after: discord.Channel):
+        """ on_channel_update discord.py hook """
+        yield from self.call_hooks('on_channel_update', before, after)
+
+    def on_member_join(self, member: discord.Member):
+        """ on_member_join discord.py hook """
+        yield from self.call_hooks('on_member_join', member)
+
+    @asyncio.coroutine
+    def on_member_remove(self, member: discord.Member):
+        """ on_member_remove discord.py hook """
+        yield from self.call_hooks('on_member_remove', member)
+
+    @asyncio.coroutine
+    def on_member_update(self, before: discord.Member, after: discord.Member):
+        """ on_member_update discord.py hook """
+        yield from self.call_hooks('on_member_update', before, after)
+
+    @asyncio.coroutine
+    def on_server_join(self, server: discord.Server):
+        """ on_server_join discord.py hook """
+        yield from self.call_hooks('on_server_join', server)
+
+    @asyncio.coroutine
+    def on_server_remove(self, server: discord.Server):
+        """ on_server_remove discord.py hook """
+        yield from self.call_hooks('on_server_remove', server)
+
+    @asyncio.coroutine
+    def on_server_update(self, before: discord.Server, after: discord.Server):
+        """ on_server_update discord.py hook """
+        yield from self.call_hooks('on_server_update', before, after)
+
+    @asyncio.coroutine
+    def on_server_role_create(self, role: discord.Role):
+        """ on_server_role_create discord.py hook """
+        yield from self.call_hooks('on_server_role_create', role)
+
+    @asyncio.coroutine
+    def on_server_role_updated(self, before: discord.Role,
+                               after: discord.Role):
+        """ on_server_role_updated discord.py hook """
+        pass
+
+    @asyncio.coroutine
+    def on_server_emojis_update(self, before: discord.Server,
+                                after: discord.Server):
+        """ on_server_em discord.py hook """
+        yield from self.call_hooks('on_server_emojis_update', before, after)
+
+    @asyncio.coroutine
+    def on_server_available(self, server: discord.Server):
+        """ on_server_available discord.py hook """
+        yield from self.call_hooks('on_server_available', server)
+
+    @asyncio.coroutine
+    def on_server_unavailable(self, server: discord.Server):
+        """ on_server_unavailable discord.py hook """
+        yield from self.call_hooks('on_server_unavailable', server)
+
+    @asyncio.coroutine
+    def on_voice_state_update(self, before: discord.Member,
+                              after: discord.Member):
+        """ on_voice_state_update discord.py hook """
+        yield from self.call_hooks('on_voice_state_update', before, after)
+
+    @asyncio.coroutine
+    def on_member_ban(self, member: discord.Member):
+        """ on_member_ban discord.py hook """
+        yield from self.call_hooks('on_member_ban', member)
+
+    @asyncio.coroutine
+    def on_member_unban(self, server: discord.Server, user: discord.User):
+        """ on_member_unban discord.py hook """
+        yield from self.call_hooks('on_member_unban', server, user)
+
+    @asyncio.coroutine
+    def on_typing(self, channel: discord.Channel, user: discord.User,
+                  when: datetime.datetime):
+        """ on_typing discord.py hook """
+        yield from self.call_hooks('on_typing', channel, user, when)
+
+    @asyncio.coroutine
+    def on_group_join(self, channel: discord.Channel, user: discord.User):
+        """ on_group_join discord.py hook """
+        yield from self.call_hooks('on_group_join', channel, user)
+
+    @asyncio.coroutine
+    def on_group_remove(self, channel: discord.Channel, user: discord.User):
+        """ on_group_remove discord.py hook """
+        yield from self.call_hooks('on_group_remove', channel, user)
