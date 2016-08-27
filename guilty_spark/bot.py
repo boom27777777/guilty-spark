@@ -78,20 +78,24 @@ class Monitor(discord.Client):
         """
 
         limit = self.settings['character_limit']
+        ends = kwargs.setdefault('ends', '')
         if len(content) > limit:
             parts = slice_message(
-                limit, content, kwargs.setdefault('ends', ''))
+                limit, content, ends)
 
             for part in parts:
                 yield from super().send_message(
                     destination, part, *args, tts=tts)
 
         else:
-            content = cap_message(content, kwargs.setdefault('ends', ''))
+            if isinstance(ends, list):
+                content = cap_message(content, ends[0], ends[1])
+            else:
+                content = cap_message(content, ends, ends)
             yield from super().send_message(
                 destination, content, *args, tts=tts)
 
-    def say(self, message: str, ends=''):
+    def say(self, message: str, ends=None):
         """ Return a context dependant message
 
             Checks the bot's current message property and sends a message back
@@ -116,7 +120,8 @@ class Monitor(discord.Client):
             The language of the given code
         """
 
-        yield from self.say(language + '\n' + message, ends='```')
+        ends = ['```' + language + '\n', '```']
+        yield from self.say(message, ends=ends)
 
     @asyncio.coroutine
     def on_ready(self):
