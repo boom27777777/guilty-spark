@@ -108,7 +108,13 @@ class Memes(Plugin):
         return
 
     def list_memes(self):
-        memes = yaml.dump(self.memes, default_flow_style=False)
+        memes = []
+        for section, data in self.memes.items():
+            memes.append('\n- {:_^25} \n'.format(section))
+            for trigger, dank in data.items():
+                memes.append('+ {:<25} | {}'.format(trigger, dank))
+
+        memes = '\n'.join(memes)
 
         links = re.findall(r'[^<](http[^ \n]+)', memes)
 
@@ -118,7 +124,7 @@ class Memes(Plugin):
                 memes = memes.replace(link, '<{}>'.format(link))
             replaced.append(link)
 
-        yield from self.bot.code(memes)
+        yield from self.bot.code(memes, language='diff')
 
     def format_tag(self, autism: str, message: discord.Message):
         if '<user>' in autism:
