@@ -4,6 +4,7 @@ from importlib import import_module, invalidate_caches
 
 from guilty_spark import get_resource
 from guilty_spark.bot import Monitor
+from guilty_spark.plugin_system.dynamic import Dynamic
 from guilty_spark.plugin_system.plugin import Plugin
 
 
@@ -13,7 +14,7 @@ class PluginManager:
     def __init__(self):
         """ Initializes a new plugin manager with the base plugin directory """
         self.plugin_dir = 'plugins'
-        self.plugins = {}
+        self.plugins = []
 
     @staticmethod
     def plugin_objects(module):
@@ -27,9 +28,14 @@ class PluginManager:
 
         for name in dir(module):
             item = getattr(module, name)
-            if isinstance(item, type) and issubclass(item, Plugin):
-                if item != Plugin:
-                    return item
+            if isinstance(item, type):
+                if issubclass(item, Plugin):
+                    if item != Plugin:
+                        return item
+
+            if isinstance(item, Dynamic):
+                if item != Dynamic:
+                    return item.make_plug()
 
     def load_plugin(self, name):
         """ Load a given name and search for a plugin
@@ -42,12 +48,14 @@ class PluginManager:
             module = import_module('plugins.{}'.format(name))
         except:
             logging.error('Failed to load plugin %s', name)
+            raise
             return
 
         plug_obj = self.plugin_objects(module)
 
         if plug_obj:
-            self.plugins[name] = plug_obj
+            self.plugins.append((name, plug_obj))
+
             logging.info('Loaded plugin %s', name)
 
     def load(self):
@@ -72,6 +80,6 @@ class PluginManager:
         :param bot:
             The Monitor object to bind to
         """
-        for name, obj in self.plugins.items():
+        for name, obj in self.plugins:
             plugin = obj(name, bot)
             bot.register_plugin(plugin)

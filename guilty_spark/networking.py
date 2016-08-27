@@ -12,7 +12,7 @@ def fetch_page(url, method='GET', data=None):
     :param data:
         Data for POST
     :return:
-        Response content or None if an error occurs
+        Response content in bytes or None if an error occurs
     """
     content = None
     try:

@@ -12,7 +12,7 @@ class Help(Plugin):
         super().__init__(name, bot, commands=['help'])
 
     @asyncio.coroutine
-    def help(self):
+    def help(self, _):
         yield from self.bot.code('Gives you helps \n' + usage)
 
     @asyncio.coroutine
@@ -49,6 +49,6 @@ class Help(Plugin):
                 command = self.bot.prefix + command
 
             if command in self.bot.commands:
-                yield from self.bot.commands[command].help()
+                yield from self.bot.commands[command].help(command)
             else:
                 yield from self.bot.say("I'm not familiar with that command, curious")
