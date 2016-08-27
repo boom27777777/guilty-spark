@@ -40,7 +40,7 @@ class RP(Plugin):
             yield from self.bot.send_file(channel, log, )
 
     @asyncio.coroutine
-    def help(self):
+    def help(self, _):
         yield from self.bot.code(
             'A simple helper for Role playing\n'
             '    record - Start recording a log for a session\n'

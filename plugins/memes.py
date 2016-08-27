@@ -52,7 +52,7 @@ class Memes(Plugin):
                 return True
         return False
 
-    def help(self):
+    def help(self, _):
         yield from self.bot.say(
             ('```Retune the dank emitters to include new autism\n\n{}\n\n'
              'in: trigger is anywhere in the message\n'

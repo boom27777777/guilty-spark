@@ -172,7 +172,7 @@ class Plugin:
         pass
 
     @asyncio.coroutine
-    def help(self):
+    def help(self, command: str):
         yield from self.bot.say("Help hasn't been added for this command yet")
 
     def __repr__(self):
