@@ -28,13 +28,7 @@ class Monitor(discord.Client):
         self.callbacks = {}
         self.commands = {}
         self.plugins = {}
-        self.description = 'I am the Monitor of Installation 04. ' \
-                           'I am 343 Guilty Spark'
 
-        self.help_message = self.description + \
-            '\nTry !help [command] if you need specific help any command'
-
-        #
         self.settings = config.load_config(settings_file)
 
         self.prefix = self.settings['command_prefix']
