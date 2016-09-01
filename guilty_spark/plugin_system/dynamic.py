@@ -14,31 +14,58 @@ Usage
 """
 import asyncio
 import discord
+from collections import OrderedDict
 from guilty_spark.plugin_system.plugin import Plugin
+
+
+class DynamicError(BaseException):
+    def __init__(self, msg):
+        self.msg = msg
+
+    def __repr__(self):
+        return self.msg
 
 
 class Dynamic:
     def __init__(self):
         self.commands = {}
 
+    @staticmethod
+    def _build_args(func, glob):
+        code = func.__code__
+        if not glob:
+            args = code.co_varnames[:code.co_argcount]
+        else:
+            args = [code.co_varnames[0]]
+
+        return list(args)
+
+    @staticmethod
+    def _build_usage(cmd, args):
+        return 'Usage: {{}}{} {}'.format(
+            cmd, ' '.join('[{}]'.format(v) for v in args))
+
     def command(self, glob=False, context=False):
         def _wrap(func):
             cmd = func.__name__
-            if not glob:
-                args = list(
-                    func.__code__.co_varnames[:func.__code__.co_argcount]
-                )
-            else:
-                args = [func.__code__.co_varnames[0]]
+            args = self._build_args(func, glob)
 
             if context:
                 args.pop(0)
 
-            usage = 'Usage: {{}}{} {}'.format(
-                cmd, ' '.join('[{}]'.format(v) for v in args))
-            help = (func.__doc__ or '') + '\n' + usage
+            usage = self._build_usage(cmd, args)
 
-            self.commands[cmd] = (args, usage, help, func, glob, context)
+            vals = OrderedDict([
+                ('args', args),
+                ('usage', usage),
+                ('help', (func.__doc__ or '') + '\n' + usage),
+                ('func', func),
+                ('flags', {
+                    'glob': glob,
+                    'context': context,
+                }),
+            ])
+            self.commands[cmd] = vals
 
         return _wrap
 
@@ -56,8 +83,8 @@ class Dynamic:
             @asyncio.coroutine
             def help(self, command):
                 command = self._strip_prefix(command)
-                _, help = cmds[command]
-                yield from self.bot.code(self._prefix(help))
+                _, hlp = cmds[command]
+                yield from self.bot.code(self._prefix(hlp))
 
             @asyncio.coroutine
             def on_command(self, command: str, message: discord.Message):
@@ -65,7 +92,7 @@ class Dynamic:
                 func, *_ = cmds[command]
                 try:
                     yield from self.bot.say(func(message))
-                except IndexError as e:
+                except DynamicError as e:
                     yield from self.bot.code(self._prefix(str(e)))
 
         return plug
@@ -73,20 +100,21 @@ class Dynamic:
     def make_plug(self):
         cmds = {}
         for cmd, vals in self.commands.items():
-            params, usage, help, func, glob, message = vals
+            params, usage, hlp, func, flags = vals.values()
 
             def _func(msg):
                 _, *args = msg.content.rstrip().split()
-                is_globed = glob and len(args) > 0
+                is_globed = flags['glob'] and len(args) > 0
 
-                if message:
+                if flags['context']:
                     return func(msg)
 
                 elif len(args) == len(params) or is_globed:
                     return func(*args)
 
                 else:
-                    raise IndexError(usage)
+                    raise DynamicError(usage)
 
-            cmds[cmd] = (_func, help)
+            cmds[cmd] = (_func, hlp)
+
         return self._make_plugin(cmds)
