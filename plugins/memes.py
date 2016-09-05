@@ -62,6 +62,7 @@ class Memes(Plugin):
     def cache_memes(self):
         yield from self._memes.cache()
 
+    @asyncio.coroutine
     def delete_meme(self, trigger: str):
         for key in self.memes:
             if trigger in self.memes[key]:
@@ -121,7 +122,8 @@ class Memes(Plugin):
         if not arg:
             yield from self.bot.code(usage)
 
-        if self.delete_meme(arg):
+        deleted = yield from self.delete_meme(arg)
+        if deleted:
             yield from self.bot.say('Meme unbound')
         else:
             yield from self.bot.say('You have given me stale memes')
