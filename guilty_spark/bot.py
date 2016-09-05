@@ -142,8 +142,9 @@ class Monitor(discord.Client):
 
         logging.info('Connected as %s(%s)', self.user.name, self.user.id)
 
+    @asyncio.coroutine
     def call_hooks(self, dep: str, *args, **kwargs):
-        """
+        """ |coro|
 
             Iterates through the attached plugins and calls any plugin
             with the relevant hooks
@@ -186,10 +187,14 @@ class Monitor(discord.Client):
 
             # Test our available commands for a matching signature and pass
             # the message onto the appropriate plugin on_command hook
-            args = message.content.split()
-            for command, plugin in self.commands.items():
-                if command == args[0]:
-                    yield from plugin.on_command(args[0], message)
+            command, *_ = message.content.split()
+            try:
+                plugin = self.commands[command]
+                if plugin.enabled:
+                    yield from plugin.on_command(command, message)
+            except KeyError:
+                pass
+
             return
 
         # Run all on_message hooks
