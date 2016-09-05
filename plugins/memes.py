@@ -1,9 +1,11 @@
 import asyncio
 import discord
-import yaml
 import re
+import os
+import yaml
 
-from guilty_spark.plugin_system.data import plugin_file
+from guilty_spark import get_resource
+from guilty_spark.plugin_system.data import CachedDict, plugin_file
 from guilty_spark.plugin_system.plugin import Plugin
 
 usage = 'Usage:\n' \
@@ -17,9 +19,29 @@ class Memes(Plugin):
         super().__init__(
             name, bot, commands=['bindmeme', 'unbindmeme', 'listmemes']
         )
-        self._memes = {}
+        self._memes = CachedDict('shitposts')
         self.server_id = 0
         self.load_memes()
+
+    def _migrate_memes(self):
+        try:
+            with plugin_file('shitpost.yml') as memes:
+                old_memes = yaml.load(memes)
+                if not old_memes:
+                    return
+                for key, value in old_memes.items():
+                    self._memes[key] = value
+            yield from self.cache_memes()
+            os.remove(get_resource('plugin_data', 'shitpost.yml'))
+        except IOError:
+            return
+
+    @asyncio.coroutine
+    def on_load(self):
+        yield from super().on_load()
+        yield from self._memes.load()
+        yield from self._migrate_memes()
+
 
     @property
     def memes(self):
@@ -33,28 +55,25 @@ class Memes(Plugin):
             }
             return self._memes[self.server_id]
 
+    @asyncio.coroutine
     def load_memes(self):
-        try:
-            with plugin_file('shitpost.yml') as memes:
-                self._memes = yaml.load(memes)
-        except IOError:
-            pass
+        yield from self._memes.load()
 
+    @asyncio.coroutine
     def cache_memes(self):
-        with plugin_file('shitpost.yml', 'w') as memes:
-            yaml.dump(self._memes, memes, default_flow_style=False)
+        yield from self._memes.cache()
 
     def delete_meme(self, trigger: str):
         for key in self.memes:
             if trigger in self.memes[key]:
                 del self.memes[key][trigger]
-                self.cache_memes()
+                yield from self.cache_memes()
                 return True
         return False
 
     def help(self, _):
-        yield from self.bot.say(
-            ('```Retune the dank emitters to include new autism\n\n{}\n\n'
+        yield from self.bot.code(
+            ('Retune the dank emitters to include new autism\n\n{}\n\n'
              'in: trigger is anywhere in the message\n'
              'is: is exactly equal to trigger\n'
              're: RegEx matching\n\n'
@@ -63,7 +82,7 @@ class Memes(Plugin):
              '<channel> | The channel the message was triggered in\n'
              '<server>  | The server the message was triggered in\n'
              'Example:\n'
-             '\t!bindmeme is::kthx::bai <user>```'
+             '\t!bindmeme is::kthx::bai <user>'
              ).format(usage))
         return
 
@@ -71,11 +90,11 @@ class Memes(Plugin):
         content = content.replace(self.bot.prefix + 'bindmeme', '')
         args = content.split('::')
         if len(args) != 3:
-            yield from self.bot.say(usage)
+            yield from self.bot.code(usage)
             return
         meme_type, trigger, meme = [a.strip() for a in args]
         if meme_type not in ['in', 'is', 're']:
-            yield from self.bot.say(usage)
+            yield from self.bot.code(usage)
             return
         if len(trigger) < 3:
             yield from self.bot.say('Trigger needs to be more then 3 characters')
@@ -90,16 +109,15 @@ class Memes(Plugin):
             self.memes[meme_type] = {}
             self.memes[meme_type][trigger] = meme
 
-        self.cache_memes()
+        yield from self.cache_memes()
         yield from self.bot.say('Meme bound')
-        return
 
     def unbind_meme(self, content: str):
         content = content.replace(self.bot.prefix + 'unbindmeme', '')
         arg = content.strip()
 
         if not arg:
-            yield from self.bot.say(usage)
+            yield from self.bot.code(usage)
 
         if self.delete_meme(arg):
             yield from self.bot.say('Meme unbound')
