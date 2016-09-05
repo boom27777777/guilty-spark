@@ -14,3 +14,4 @@ Required libraries
 ------------------
 - discord python api
 - PyYaml
+- aioredis
