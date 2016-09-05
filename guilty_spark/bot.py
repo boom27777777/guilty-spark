@@ -55,7 +55,7 @@ class Monitor(discord.Client):
     def _register_plugin(self, obj):
         """ Bind a new plugin to the bot
 
-            Also walks the plugin dependinces to avoid having to iterate
+            Also walks the plugin dependencies to avoid having to iterate
             through the entire discord api on every event.
 
         :param obj:

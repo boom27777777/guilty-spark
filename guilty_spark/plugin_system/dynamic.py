@@ -1,16 +1,7 @@
 """
 :Date: 2016-08-13
-:Version: 0.0.1
 :Author:
     - Jackson McCrea (jacksonmccrea@gmail.com)
-
-Goal
-----
-
-
-Usage
------
-    ``$ python dynamic``
 """
 import asyncio
 import discord
@@ -70,7 +61,7 @@ class Dynamic:
         return _wrap
 
     def _make_plugin(self, cmds):
-        class plug(Plugin):
+        class Plug(Plugin):
             def __init__(self, name, bot):
                 super().__init__(name, bot, commands=cmds.keys())
 
@@ -95,7 +86,7 @@ class Dynamic:
                 except DynamicError as e:
                     yield from self.bot.code(self._prefix(str(e)))
 
-        return plug
+        return Plug
 
     def make_plug(self):
         cmds = {}
