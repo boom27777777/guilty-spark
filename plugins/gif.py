@@ -31,7 +31,7 @@ def gif(*search):
 
     if len(gifs) > 0:
         gif_id = randint(0, len(gifs) - 1)
-        gif = gifs[gif_id]['images']['downsized_medium']['url']
-        return gif
+        gif_url = gifs[gif_id]['images']['downsized_medium']['url']
+        return gif_url
     else:
         return 'No gifs found, today is a sad day.'

@@ -9,9 +9,9 @@ from guilty_spark.plugin_system.data import CachedDict, plugin_file
 from guilty_spark.plugin_system.plugin import Plugin
 
 usage = 'Usage:\n' \
-        '\t!bindmeme [in/is]::[trigger]::[meme]\n' \
-        '\t!unbindmeme [trigger]\n' \
-        '\t!listmemes'
+        '    !bindmeme [in/is]::[trigger]::[meme]\n' \
+        '    !unbindmeme [trigger]\n' \
+        '    !listmemes'
 
 
 class Memes(Plugin):
@@ -41,7 +41,6 @@ class Memes(Plugin):
         yield from super().on_load()
         yield from self._memes.load()
         yield from self._migrate_memes()
-
 
     @property
     def memes(self):
@@ -73,17 +72,20 @@ class Memes(Plugin):
 
     def help(self, _):
         yield from self.bot.code(
-            ('Retune the dank emitters to include new autism\n\n{}\n\n'
-             'in: trigger is anywhere in the message\n'
-             'is: is exactly equal to trigger\n'
-             're: RegEx matching\n\n'
-             'I also support various tags you can use:\n'
-             '<user>    | The user that triggered the message\n'
-             '<channel> | The channel the message was triggered in\n'
-             '<server>  | The server the message was triggered in\n'
-             'Example:\n'
-             '\t!bindmeme is::kthx::bai <user>'
-             ).format(usage))
+            '\n'.join([
+                'Retune the dank emitters to recognize new memes\n',
+                usage + '\n',
+                'Triggers:'
+                '    in: trigger is anywhere in the message',
+                '    is: is exactly equal to trigger',
+                '    re: RegEx matching\n',
+                'I also support various tags you can use:',
+                '    <user>    | The user that triggered the message',
+                '    <channel> | The channel the message was triggered in',
+                '    <server>  | The server the message was triggered in\n',
+                'Example:',
+                '    !bindmeme is::kthx::bai <user>',
+             ]))
         return
 
     def bind_meme(self, content: str):

@@ -6,7 +6,7 @@ import aioredis
 from guilty_spark import get_resource
 
 
-def plugin_file(name: str, mode: str='r'):
+def plugin_file(name: str, mode: str = 'r'):
     """ Helper function to get a file located in the bot's plugin data
     directory
 
@@ -55,7 +55,6 @@ class CachedDict(dict):
     def _load_keys(self, data: bytes):
         for key, item in json.loads(data.decode()).items():
             self[key] = item
-
 
     @asyncio.coroutine
     def load(self):

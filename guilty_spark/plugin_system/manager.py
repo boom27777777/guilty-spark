@@ -46,7 +46,6 @@ class PluginManager:
             module = import_module('plugins.{}'.format(name))
         except:
             logging.error('Failed to load plugin %s', name)
-            raise
             return
 
         plug_obj = self.plugin_objects(module)

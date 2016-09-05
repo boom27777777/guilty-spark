@@ -1,13 +1,9 @@
 import asyncio
-import logging
 
-from guilty_spark.application import bot, logger
+from guilty_spark.application import bot
 
 
-def main(log=None):
-    if log:
-        log = open(log, 'a')
-
+def main():
     loop = asyncio.get_event_loop()
 
     try:
