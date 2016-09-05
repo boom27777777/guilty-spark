@@ -4,6 +4,7 @@
 :Author:
     - Jackson McCrea (jacksonmccrea@gmail.com)
 """
+import asyncio
 import discord
 
 from guilty_spark.bot import Monitor
@@ -25,7 +26,8 @@ class PluginAdmin(Plugin):
         handler = yield from self._get_plugins(name)
         if handler and not handler.enabled:
             handler.enable(message.channel.id)
-            handler.cache()
+            yield from handler.cache()
+
             yield from self.bot.say('Plugin {} enabled'.format(name))
         else:
             yield from self.bot.say('Plugin {} already enabled'.format(name))
@@ -34,7 +36,7 @@ class PluginAdmin(Plugin):
         handler = yield from self._get_plugins(name)
         if handler.enabled:
             handler.disable(message.channel.id)
-            handler.cache()
+            yield from handler.cache()
 
             yield from self.bot.say('Disabled {} for channel {}'.format(
                 name, message.channel
@@ -42,6 +44,7 @@ class PluginAdmin(Plugin):
         else:
             yield from self.bot.say('Plugin {} already disabled'.format(name))
 
+    @asyncio.coroutine
     def on_command(self, command, message: discord.Message):
         args = message.content.split()
 

@@ -1,4 +1,7 @@
+import asyncio
 import yaml
+import json
+import aioredis
 
 from guilty_spark import get_resource
 
@@ -30,3 +33,49 @@ def load_yml(cache_path: str, empty=None):
         data = empty
 
     return data
+
+
+class CachedDict(dict):
+    def __init__(self, name, **kwargs):
+        super().__init__(**kwargs)
+        self.name = 'CachedDict-' + name
+        self._redis = None
+
+    def _serializable(self):
+        serializable = {}
+        for key in [k for k in self if k != '_redis']:
+            serializable[key] = self[key]
+        return serializable
+
+    @asyncio.coroutine
+    def _make_redis(self):
+        self._redis = yield from aioredis.create_redis(
+            ('localhost', 6379), loop=asyncio.get_event_loop())
+
+    def _load_keys(self, data: bytes):
+        for key, item in json.loads(data.decode()).items():
+            self[key] = item
+
+
+    @asyncio.coroutine
+    def load(self):
+        if not self._redis:
+            yield from self._make_redis()
+
+        data = yield from self._redis.get(self.name)
+
+        if isinstance(data, bytes):
+            try:
+                self._load_keys(data)
+            except:
+                for k in self._serializable():
+                    del self[k]
+
+            return True
+        return False
+
+    def cache(self):
+        if self._redis:
+            data = self._serializable()
+            dump = json.dumps(data, separators=(',', ':'))
+            yield from self._redis.set(self.name, dump)
