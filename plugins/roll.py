@@ -21,7 +21,7 @@ def roll(number):
         raise DynamicError('Only numbers are allowed')
 
     outcomes = [i for i in range(1, number)]
-    for _ in range(number):
+    for _ in range(20):
         shuffle(outcomes)
 
     return str(outcomes[0])
