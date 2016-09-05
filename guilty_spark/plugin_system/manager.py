@@ -2,8 +2,6 @@ import logging
 from os import listdir
 from importlib import import_module, invalidate_caches
 
-from guilty_spark import get_resource
-from guilty_spark.bot import Monitor
 from guilty_spark.plugin_system.dynamic import Dynamic
 from guilty_spark.plugin_system.plugin import Plugin
 
@@ -73,13 +71,15 @@ class PluginManager:
             name = plugin.split('.')[0]
             self.load_plugin(name)
 
-    def bind(self, bot: Monitor):
+    def make_plugs(self, bot):
         """ Iterates through bots plugins and calls bot.register_plugin for
             each one
 
         :param bot:
             The Monitor object to bind to
         """
+        plugs = []
         for name, obj in self.plugins:
             plugin = obj(name, bot)
-            bot.register_plugin(plugin)
+            plugs.append(plugin)
+        return plugs

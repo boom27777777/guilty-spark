@@ -2,16 +2,14 @@ import asyncio
 
 import datetime
 import discord
-import yaml
 
-from guilty_spark.bot import Monitor
-from guilty_spark.plugin_system.data import plugin_file
+from guilty_spark.plugin_system.data import CachedDict
 
 
 class Plugin:
     """ Base plugin class """
 
-    def __init__(self, name: str, bot: Monitor, commands=None):
+    def __init__(self, name: str, bot, commands=None):
         """ Set's up the plugin's base resources
 
             Walks the Subclass's structure and search for any hooks
@@ -34,18 +32,22 @@ class Plugin:
             method = self.__getattribute__(dep)
             if asyncio.iscoroutinefunction(method):
                 self.depends.append(dep)
-                self.__setattr__(dep, self.is_enabled(method))
 
-        self.cache_file = self.name + '.cache'
-        try:
-            with plugin_file(self.cache_file) as cache:
-                self.disabled_channels = yaml.load(cache)
-        except IOError:
-            self.disabled_channels = []
+        self._cache = CachedDict(self.name)
+        self.disabled_channels = []
 
+    @asyncio.coroutine
+    def on_load(self):
+        data = yield from self._cache.load()
+
+        if not data or not self._cache.setdefault('disabled_channels', []):
+            self._cache['disabled_channels'] = []
+
+        self.disabled_channels = self._cache['disabled_channels']
+
+    @asyncio.coroutine
     def cache(self):
-        with plugin_file(self.cache_file, 'w') as cache:
-            yaml.dump(self.disabled_channels, cache)
+        yield from self._cache.cache()
 
     def disable(self, channel_id):
         self.disabled_channels.append(channel_id)
@@ -60,15 +62,6 @@ class Plugin:
             if chan_id not in self.disabled_channels:
                 return True
         return False
-
-    def is_enabled(self, func):
-        """function wrapper for bot hooks"""
-
-        def wrapped(*args, **kwargs):
-            if self.enabled:
-                yield from func(*args, **kwargs)
-
-        return wrapped
 
     def on_message(self, message: discord.Message):
         """ on_message discord.py hook """

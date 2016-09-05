@@ -6,6 +6,7 @@ import logging
 
 import guilty_spark.config as config
 from guilty_spark.util import slice_message, cap_message
+from guilty_spark.plugin_system.manager import PluginManager
 
 
 class Monitor(discord.Client):
@@ -29,6 +30,9 @@ class Monitor(discord.Client):
         self.commands = {}
         self.plugins = {}
 
+        self.plugin_manager = PluginManager()
+        self.plugin_manager.load()
+
         self.settings = config.load_config(settings_file)
 
         self.prefix = self.settings['command_prefix']
@@ -36,10 +40,19 @@ class Monitor(discord.Client):
 
     def login(self, *args):
         """ Send the initial login payload"""
-
+        yield from self.load_plugins()
         yield from super().login(self.settings['token'])
 
-    def register_plugin(self, obj):
+    @asyncio.coroutine
+    def load_plugins(self):
+        if not self.plugin_manager:
+            return
+
+        for plug in self.plugin_manager.make_plugs(self):
+            yield from self._register_plugin(plug)
+
+    @asyncio.coroutine
+    def _register_plugin(self, obj):
         """ Bind a new plugin to the bot
 
             Also walks the plugin dependinces to avoid having to iterate
@@ -60,6 +73,8 @@ class Monitor(discord.Client):
                 self.commands[self.prefix + command] = obj
 
         self.plugins[obj.name] = obj
+
+        yield from obj.on_load()
 
     def send_message(self, destination, content, *args, tts=False, **kwargs):
         """ Sends message through the discord api
@@ -137,7 +152,8 @@ class Monitor(discord.Client):
             The dependency to test for
         """
         for plugin in self.callbacks.setdefault(dep, []):
-            yield from getattr(plugin, dep)(*args, **kwargs)
+            if plugin.enabled:
+                yield from getattr(plugin, dep)(*args, **kwargs)
 
     @asyncio.coroutine
     def on_message(self, message: discord.Message):
