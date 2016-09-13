@@ -5,7 +5,7 @@
     - Jackson McCrea (jacksonmccrea@gmail.com)
 """
 
-from random import shuffle
+from random import shuffle, randint
 from guilty_spark.plugin_system.dynamic import Dynamic, DynamicError
 
 dyn = Dynamic()
@@ -20,8 +20,16 @@ def roll(number):
     except ValueError:
         raise DynamicError('Only numbers are allowed')
 
-    outcomes = [i for i in range(1, number)]
-    for _ in range(20):
-        shuffle(outcomes)
+    if number <= 0:
+        raise DynamicError('Only 1 and higher numbers are allowed')
 
-    return str(outcomes[0])
+    if number > 1000:
+        result = randint(1, number)
+
+    else:
+        outcomes = [i for i in range(1, number)]
+        for _ in range(20):
+            shuffle(outcomes)
+        result = outcomes[0]
+
+    return str(result)
