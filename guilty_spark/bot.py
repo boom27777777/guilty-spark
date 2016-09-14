@@ -170,7 +170,8 @@ class Monitor(discord.Client):
 
         # Log the incoming message
         logging.info(
-            '%s:%s: %s',
+            '%s:%s:%s: %s',
+            message.server,
             message.channel,
             message.author.name,
             message.content
