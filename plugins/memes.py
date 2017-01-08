@@ -76,7 +76,7 @@ class Memes(Plugin):
             '\n'.join([
                 'Retune the dank emitters to recognize new memes\n',
                 usage + '\n',
-                'Triggers:'
+                'Triggers:',
                 '    in: trigger is anywhere in the message',
                 '    is: is exactly equal to trigger',
                 '    re: RegEx matching\n',
@@ -145,6 +145,8 @@ class Memes(Plugin):
             if link not in replaced:
                 memes = memes.replace(link, '<{}>'.format(link))
             replaced.append(link)
+
+        memes = memes.replace('```', '')
 
         yield from self.bot.code(memes, language='diff')
 
