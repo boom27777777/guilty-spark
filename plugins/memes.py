@@ -24,6 +24,7 @@ class Memes(Plugin):
                 'unbindmeme',
                 'listmemes',
                 'searchmemes',
+                'copymemes',
             ]
         )
         self._memes = CachedDict('shitposts')
@@ -77,6 +78,14 @@ class Memes(Plugin):
                 yield from self.cache_memes()
                 return True
         return False
+
+    @asyncio.coroutine
+    def copy_memes_from(self, old_id):
+        for type in self._memes[old_id]:
+            for trigger, meme in self._memes[old_id][type].items():
+                self.memes[type][trigger] = meme
+
+        yield from self.cache_memes()
 
     def help(self, _):
         yield from self.bot.code(
@@ -210,8 +219,25 @@ class Memes(Plugin):
         yield from self.bot.code('+{:<25}| {}'.format(meme, dank), language='diff')
 
     @asyncio.coroutine
+    def copy_memes(self, message: discord.Message):
+        if int(message.author.id) != self.bot.settings['owner']:
+            yield from self.bot.say(
+                'Sorry only <@{}> has that power'.format(
+                    self.bot.settings['owner']
+                ))
+            return
+        try:
+            yield from self.copy_memes_from(
+                message.content.split()[1]
+            )
+            yield from self.bot.say('It is done.')
+        except BaseException:
+            yield from self.bot.say('Something went wrong!')
+
+    @asyncio.coroutine
     def on_command(self, command, message: discord.Message):
         self.set_server_id(message)
+
         command = command[1:]
         if 'bindmeme' == command:
             yield from self.bind_meme(message.content)
@@ -225,6 +251,8 @@ class Memes(Plugin):
         elif 'searchmemes' == command:
             yield from self.search_memes(message.content)
 
+        elif 'copymemes' == command:
+            yield from self.copy_memes(message)
 
     @asyncio.coroutine
     def on_message(self, message: discord.Message):
