@@ -8,16 +8,23 @@ from guilty_spark import get_resource
 from guilty_spark.plugin_system.data import CachedDict, plugin_file
 from guilty_spark.plugin_system.plugin import Plugin
 
-usage = 'Usage:\n' \
-        '    !bindmeme [in/is]::[trigger]::[meme]\n' \
-        '    !unbindmeme [trigger]\n' \
-        '    !listmemes'
+usage = '''Usage:
+    !bindmeme [in/is]::[trigger]::[meme]
+    !unbindmeme [trigger]
+    !listmemes
+    !searchmemes [trigger]
+'''
 
 
 class Memes(Plugin):
     def __init__(self, name, bot):
         super().__init__(
-            name, bot, commands=['bindmeme', 'unbindmeme', 'listmemes']
+            name, bot, commands=[
+                'bindmeme',
+                'unbindmeme',
+                'listmemes',
+                'searchmemes',
+            ]
         )
         self._memes = CachedDict('shitposts')
         self.server_id = 0
@@ -74,19 +81,20 @@ class Memes(Plugin):
     def help(self, _):
         yield from self.bot.code(
             '\n'.join([
-                'Retune the dank emitters to recognize new memes\n',
-                usage + '\n',
-                'Triggers:',
-                '    in: trigger is anywhere in the message',
-                '    is: is exactly equal to trigger',
-                '    re: RegEx matching\n',
-                'I also support various tags you can use:',
-                '    <user>    | The user that triggered the message',
-                '    <channel> | The channel the message was triggered in',
-                '    <server>  | The server the message was triggered in\n',
-                'Example:',
-                '    !bindmeme is::kthx::bai <user>',
-             ]))
+                '-Retune the dank emitters to recognize new memes\n',
+                '-' + usage.replace('\n', '\n+') + '\n',
+                '-Triggers:',
+                '+    in: trigger is anywhere in the message',
+                '+    is: is exactly equal to trigger',
+                '+    re: RegEx matching\n',
+                '-I also support various tags you can use:',
+                '+    <user>    | The user that triggered the message',
+                '+    <channel> | The channel the message was triggered in',
+                '+    <server>  | The server the message was triggered in\n',
+                '-Examples:',
+                '+    !bindmeme is::kthx::bai <user>',
+                '+    !bindmeme re::(?i)regex::Case insensitive meme!',
+             ]), language='diff')
         return
 
     def bind_meme(self, content: str):
@@ -168,6 +176,39 @@ class Memes(Plugin):
         else:
             self.server_id = message.channel.id
 
+    def get_meme(self, message: str):
+        memes = self.memes
+        dank = ""
+        maymay = ""
+        if message in memes['is']:
+            dank = memes['is'][message]
+            maymay = message
+
+        else:
+            for meme, autism in memes['in'].items():
+                if meme in message:
+                    dank = autism
+                    maymay = meme
+
+            for meme, autism in memes['re'].items():
+                try:
+                    if re.search(meme, message):
+                        dank = autism
+                        maymay = meme
+                except:
+                    self.delete_meme(meme)
+        return dank, maymay
+
+    def search_memes(self, content):
+        content = ' '.join(content.split()[1:])
+        if not content:
+            yield from self.bot.code(usage)
+            return
+
+        dank, meme = self.get_meme(content)
+        dank = dank.replace('```', '')
+        yield from self.bot.code('+{:<25}| {}'.format(meme, dank), language='diff')
+
     @asyncio.coroutine
     def on_command(self, command, message: discord.Message):
         self.set_server_id(message)
@@ -175,32 +216,21 @@ class Memes(Plugin):
         if 'bindmeme' == command:
             yield from self.bind_meme(message.content)
 
-        if 'unbindmeme' == command:
+        elif 'unbindmeme' == command:
             yield from self.unbind_meme(message.content)
 
-        if 'listmemes' == command:
+        elif 'listmemes' == command:
             yield from self.list_memes()
+
+        elif 'searchmemes' == command:
+            yield from self.search_memes(message.content)
+
 
     @asyncio.coroutine
     def on_message(self, message: discord.Message):
         self.set_server_id(message)
 
-        memes = self.memes
-        dank = None
-        if message.content in memes['is']:
-            dank = memes['is'][message.content]
-
-        else:
-            for meme, autism in memes['in'].items():
-                if meme in message.content:
-                    dank = autism
-
-            for meme, autism in memes['re'].items():
-                try:
-                    if re.search(meme, message.content):
-                        dank = autism
-                except:
-                    self.delete_meme(meme)
+        dank, _ = self.get_meme(message.content)
 
         if dank:
             if re.search(r'<(user|channel|server)>', dank):
