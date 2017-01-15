@@ -48,7 +48,7 @@ class Help(Plugin):
         name_fmt = self._row_format()
 
         commands = [
-            'I am the Monitor of Installation 04. I am 343 Guilty Spark'
+            'I am the Monitor of Installation 04. I am 343 Guilty Spark '
             'Try !help [command] if you need specific help any command',
             '\nThe commands available are:\n',
             name_fmt.format('Plugin') + 'Command\n',
