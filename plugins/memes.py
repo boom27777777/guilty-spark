@@ -230,7 +230,7 @@ class Memes(Plugin):
             yield from self.copy_memes_from(
                 message.content.split()[1]
             )
-            yield from self.bot.say('It is done.')
+            yield from self.bot.say('The deed is done.')
         except BaseException:
             yield from self.bot.say('Something went wrong!')
 
