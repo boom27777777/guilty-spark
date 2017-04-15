@@ -25,6 +25,8 @@ class Memes(Plugin):
                 'listmemes',
                 'searchmemes',
                 'copymemes',
+                'linkmemes',
+                'unlinkmemes',
             ]
         )
         self._memes = CachedDict('shitposts')
@@ -185,6 +187,9 @@ class Memes(Plugin):
         else:
             self.server_id = message.channel.id
 
+        if self.memes.setdefault('link', None):
+            self.server_id = self.memes['link']
+
     def get_meme(self, message: str):
         memes = self.memes
         dank = ""
@@ -235,6 +240,37 @@ class Memes(Plugin):
             yield from self.bot.say('Something went wrong!')
 
     @asyncio.coroutine
+    def link_memes(self, message):
+        _, link_id = message.content.split()
+        if int(message.author.id) != self.bot.settings['owner']:
+            yield from self.bot.say(
+                'Sorry only <@{}> has that power'.format(
+                    self.bot.settings['owner']
+                ))
+            return
+        elif link_id not in self._memes:
+            yield from self.bot.say(
+                'I can\'t find a server with the id of {}'.format(link_id)
+            )
+        else:
+            self.memes['link'] = link_id
+            yield from self.bot.say('Meme bridge established.')
+
+    @asyncio.coroutine
+    def unlink_memes(self, message):
+        if int(message.author.id) != self.bot.settings['owner']:
+            yield from self.bot.say(
+                'Sorry only <@{}> has that power'.format(
+                    self.bot.settings['owner']
+                ))
+            return
+        elif self.memes.setdefault('link', None):
+            self.memes.pop('link', None)
+            yield from self.bot.say('Meme bridge terminated')
+        else:
+            yield from self.bot.say('No meme bridge detected.')
+
+    @asyncio.coroutine
     def on_command(self, command, message: discord.Message):
         self.set_server_id(message)
 
@@ -253,6 +289,12 @@ class Memes(Plugin):
 
         elif 'copymemes' == command:
             yield from self.copy_memes(message)
+
+        elif 'linkmemes' == command:
+            yield from self.link_memes(message)
+
+        elif 'unlinkmemes' == command:
+            yield from self.unlink_memes(message)
 
     @asyncio.coroutine
     def on_message(self, message: discord.Message):
