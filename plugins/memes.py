@@ -8,12 +8,16 @@ from guilty_spark import get_resource
 from guilty_spark.plugin_system.data import CachedDict, plugin_file
 from guilty_spark.plugin_system.plugin import Plugin
 
-usage = '''Usage:
-    !bindmeme [in/is]::[trigger]::[meme]
-    !unbindmeme [trigger]
-    !listmemes
-    !searchmemes [trigger]
-'''
+usage = '''-Usage:
++    !bindmeme [in/is/re]||[trigger]||[meme]
++    !unbindmeme [trigger]
++    !listmemes
++    !searchmemes [trigger]
+
+-Admin Commands:
++    !linkmemes [server_id]
++    !unlinkmemes
++    !copymemes [server_id]'''
 
 
 class Memes(Plugin):
@@ -60,7 +64,8 @@ class Memes(Plugin):
             self._memes[self.server_id] = {
                 'in': {},
                 'is': {},
-                're': {}
+                're': {},
+                'link': None,
             }
             return self._memes[self.server_id]
 
@@ -75,6 +80,8 @@ class Memes(Plugin):
     @asyncio.coroutine
     def delete_meme(self, trigger: str):
         for key in self.memes:
+            if not self.memes[key]:
+                continue
             if trigger in self.memes[key]:
                 del self.memes[key][trigger]
                 yield from self.cache_memes()
@@ -93,24 +100,24 @@ class Memes(Plugin):
         yield from self.bot.code(
             '\n'.join([
                 '-Retune the dank emitters to recognize new memes\n',
-                '-' + usage.replace('\n', '\n+') + '\n',
+                usage + '\n',
                 '-Triggers:',
                 '+    in: trigger is anywhere in the message',
-                '+    is: is exactly equal to trigger',
-                '+    re: RegEx matching\n',
+                '+    is: message is exactly equal to trigger',
+                '+    re: RegEx matching on message (python flavored)\n',
                 '-I also support various tags you can use:',
                 '+    <user>    | The user that triggered the message',
                 '+    <channel> | The channel the message was triggered in',
                 '+    <server>  | The server the message was triggered in\n',
                 '-Examples:',
-                '+    !bindmeme is::kthx::bai <user>',
-                '+    !bindmeme re::(?i)regex::Case insensitive meme!',
+                '+    !bindmeme is||kthx||bai <user>',
+                '+    !bindmeme re||(?i)regex||Case insensitive meme!',
              ]), language='diff')
         return
 
     def bind_meme(self, content: str):
         content = content.replace(self.bot.prefix + 'bindmeme', '')
-        args = content.split('::')
+        args = content.split('||')
         if len(args) != 3:
             yield from self.bot.code(usage)
             return
@@ -152,6 +159,9 @@ class Memes(Plugin):
         memes = []
         for section, data in self.memes.items():
             memes.append('\n- {:_^25} \n'.format(section))
+            if not data:
+                continue
+
             for trigger, dank in data.items():
                 memes.append('+ {:<25} | {}'.format(trigger, dank))
 
@@ -241,7 +251,12 @@ class Memes(Plugin):
 
     @asyncio.coroutine
     def link_memes(self, message):
-        _, link_id = message.content.split()
+        try:
+            _, link_id = message.content.split()
+        except ValueError:
+            yield from self.bot.say('You must use the link force')
+            return
+
         if int(message.author.id) != self.bot.settings['owner']:
             yield from self.bot.say(
                 'Sorry only <@{}> has that power'.format(
