@@ -15,7 +15,7 @@ from guilty_spark.plugin_system.data import plugin_file, cache_yml, load_yml
 class RP(Plugin):
     def __init__(self, name: str, bot: Monitor):
         super().__init__(name, bot, commands=['rp'])
-        self.usage = self.bot.prefix + 'rp [record|report]'
+        self.usage = self.bot.prefix + 'rp [record|upload]'
         self.cache_file = 'rp.yml'
         self.sessions = {}
 
