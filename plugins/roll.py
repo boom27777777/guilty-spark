@@ -1,4 +1,4 @@
-"""
+I"""
 :Date: 2016-09-05
 :Version: 0.0.1
 :Author:
@@ -27,7 +27,7 @@ def roll(number):
         result = randint(1, number)
 
     else:
-        outcomes = [i for i in range(1, number)]
+        outcomes = [i for i in range(1, number + 1)]
         for _ in range(20):
             shuffle(outcomes)
         result = outcomes[0]
