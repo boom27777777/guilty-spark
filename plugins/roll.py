@@ -1,4 +1,4 @@
-I"""
+"""
 :Date: 2016-09-05
 :Version: 0.0.1
 :Author:
@@ -13,7 +13,7 @@ dyn = Dynamic()
 
 @dyn.command()
 def roll(number):
-    """Roll the dice! """
+    """Roll the dice!"""
 
     try:
         number = int(number)
