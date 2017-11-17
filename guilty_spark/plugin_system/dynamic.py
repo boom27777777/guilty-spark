@@ -3,7 +3,6 @@
 :Author:
     - Jackson McCrea (jacksonmccrea@gmail.com)
 """
-import asyncio
 import discord
 from collections import OrderedDict
 from guilty_spark.plugin_system.plugin import Plugin
@@ -71,20 +70,18 @@ class Dynamic:
             def _prefix(self, string):
                 return string.format(self.bot.prefix)
 
-            @asyncio.coroutine
-            def help(self, command):
+            async def help(self, command):
                 command = self._strip_prefix(command)
                 _, hlp = cmds[command]
-                yield from self.bot.code(self._prefix(hlp))
+                await self.bot.code(self._prefix(hlp))
 
-            @asyncio.coroutine
-            def on_command(self, command: str, message: discord.Message):
+            async def on_command(self, command: str, message: discord.Message):
                 command = self._strip_prefix(command)
                 func, *_ = cmds[command]
                 try:
-                    yield from self.bot.say(func(message))
+                    await self.bot.say(func(message))
                 except DynamicError as e:
-                    yield from self.bot.code(self._prefix(str(e)))
+                    await self.bot.code(self._prefix(str(e)))
 
         return Plug
 
