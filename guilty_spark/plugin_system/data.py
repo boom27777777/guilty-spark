@@ -47,21 +47,19 @@ class CachedDict(dict):
             serializable[key] = self[key]
         return serializable
 
-    @asyncio.coroutine
-    def _make_redis(self):
-        self._redis = yield from aioredis.create_redis(
+    async def _make_redis(self):
+        self._redis = await aioredis.create_redis(
             ('localhost', 6379), loop=asyncio.get_event_loop())
 
     def _load_keys(self, data: bytes):
         for key, item in json.loads(data.decode()).items():
             self[key] = item
 
-    @asyncio.coroutine
-    def load(self):
+    async def load(self):
         if not self._redis:
-            yield from self._make_redis()
+            await self._make_redis()
 
-        data = yield from self._redis.get(self.name)
+        data = await self._redis.get(self.name)
 
         if isinstance(data, bytes):
             try:
@@ -73,8 +71,8 @@ class CachedDict(dict):
             return True
         return False
 
-    def cache(self):
+    async def cache(self):
         if self._redis:
             data = self._serializable()
             dump = json.dumps(data, separators=(',', ':'))
-            yield from self._redis.set(self.name, dump)
+            await self._redis.set(self.name, dump)

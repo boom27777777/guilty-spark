@@ -13,9 +13,8 @@ class Help(Plugin):
         self._longest = 0
         self._padding = ''
 
-    @asyncio.coroutine
-    def help(self, _):
-        yield from self.bot.code('Gives you helps \n' + usage)
+    async def help(self, _):
+        await self.bot.code('Gives you helps \n' + usage)
 
     @property
     def _plugins(self):
@@ -62,18 +61,17 @@ class Help(Plugin):
 
         return '\n'.join(commands)
 
-    def command_help(self, command):
+    async def command_help(self, command):
         if not command.startswith(self.bot.prefix):
             command = self.bot.prefix + command
 
         if command in self.bot.commands:
-            yield from self.bot.commands[command].help(command)
+            await self.bot.commands[command].help(command)
         else:
-            yield from self.bot.say(
+            await self.bot.say(
                 'I\'m not familiar with that command, curious')
 
-    @asyncio.coroutine
-    def on_command(self, _, message: discord.Message):
+    async def on_command(self, _, message: discord.Message):
         """ Prints the relevant help information
 
         :param message:
@@ -81,6 +79,6 @@ class Help(Plugin):
         """
         args = message.content.split()
         if len(args) == 1 or len(args) > 2:
-            yield from self.bot.code(self.general_help(), language='css')
+            await self.bot.code(self.general_help(), language='css')
         else:
-            yield from self.command_help(args[1])
+            await self.command_help(args[1])

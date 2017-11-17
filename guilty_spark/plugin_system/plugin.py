@@ -36,18 +36,16 @@ class Plugin:
         self._cache = CachedDict(self.name)
         self.disabled_channels = []
 
-    @asyncio.coroutine
-    def on_load(self):
-        data = yield from self._cache.load()
+    async def on_load(self):
+        data = await self._cache.load()
 
         if not data or not self._cache.setdefault('disabled_channels', []):
             self._cache['disabled_channels'] = []
 
         self.disabled_channels = self._cache['disabled_channels']
 
-    @asyncio.coroutine
-    def cache(self):
-        yield from self._cache.cache()
+    async def cache(self):
+        await self._cache.cache()
 
     def disable(self, channel_id):
         self.disabled_channels.append(channel_id)
@@ -164,9 +162,8 @@ class Plugin:
         """ on_group_remove discord.py hook """
         pass
 
-    @asyncio.coroutine
-    def help(self, command: str):
-        yield from self.bot.say("Help hasn't been added for this command yet")
+    async def help(self, command: str):
+        await self.bot.say("Help hasn't been added for this command yet")
 
     def __repr__(self):
         return self.name
