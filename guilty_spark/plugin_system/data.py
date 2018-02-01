@@ -6,6 +6,10 @@ import aioredis
 from guilty_spark import get_resource
 
 
+def plugin_file_path(path):
+    return get_resource('plugin_data', path)
+
+
 def plugin_file(name: str, mode: str = 'r'):
     """ Helper function to get a file located in the bot's plugin data
     directory
@@ -17,7 +21,7 @@ def plugin_file(name: str, mode: str = 'r'):
     :return:
         An open file handle of the given mode ready for IO
     """
-    return open(get_resource('plugin_data', name), mode)
+    return open(plugin_file_path(name), mode)
 
 
 def cache_yml(cache_path: str, data):
