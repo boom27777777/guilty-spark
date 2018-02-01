@@ -43,23 +43,28 @@ class Help(Plugin):
 
         return cmds
 
-    def general_help(self):
-        name_fmt = self._row_format()
-
-        commands = [
-            'I am the Monitor of Installation 04. I am 343 Guilty Spark '
+    async def general_help(self):
+        embed = self.build_embed(
+            title='General Help',
+            description=
+            'I am the Monitor of Installation 04. I am 343 Guilty Spark\n\n'
             'Try !help [command] if you need specific help any command',
-            '\nThe commands available are:\n',
-            name_fmt.format('Plugin') + 'Command\n',
-            '-' * int(self._longest * 2.5)
-        ]
+            thumbnail='https://i.imgur.com/rJYfMZk.png'
+        )
+
+        plugin_body = ''
         for name, plugin in self._plugins:
-            if not plugin.commands:
-                continue
+            plugin_body += '  __**{}:**__\n'.format(name.title())
+            plugin_body += await self.bot.commands[command].help(command)
 
-            commands += self._plugin_cmds(name, plugin, name_fmt)
+            for command in plugin.commands:
+                plugin_body += '    {}{}\n'.format(self.bot.prefix, command)
 
-        return '\n'.join(commands)
+            plugin_body += '\n'
+
+        embed.add_field(name='**Plugins**', value=plugin_body, inline=True)
+
+        await self.bot.send_embed(embed)
 
     async def command_help(self, command):
         if not command.startswith(self.bot.prefix):
@@ -79,6 +84,6 @@ class Help(Plugin):
         """
         args = message.content.split()
         if len(args) == 1 or len(args) > 2:
-            await self.bot.code(self.general_help(), language='css')
+            await self.general_help()
         else:
             await self.command_help(args[1])

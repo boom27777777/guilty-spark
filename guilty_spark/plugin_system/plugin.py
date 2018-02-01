@@ -61,6 +61,43 @@ class Plugin:
                 return True
         return False
 
+    @staticmethod
+    def build_embed(title: str = None, description: str = None,
+                    fields: dict = None, thumbnail: str = None,
+                    level: int = 0):
+        """ A wrapper for Discord's ritch embed system
+
+        :param title:
+            Title of embed
+        :param description:
+            Body of embed
+        :param fields:
+            A dict of title/descriptions
+        :param thumbnail:
+            Optional post thumbnail
+        """
+
+        colors = {
+            0: 0x007C00,
+            1: 0x7C7C00,
+            2: 0x7C0000,
+        }
+
+        embed = discord.Embed(
+            title=title,
+            description=description,
+            color=colors[level]
+        )
+
+        if thumbnail:
+            embed.set_thumbnail(url=thumbnail)
+
+        if fields:
+            for k, v in fields.items():
+                embed.add_field(name=k, value=v)
+
+        return embed
+
     def on_message(self, message: discord.Message):
         """ on_message discord.py hook """
         pass
