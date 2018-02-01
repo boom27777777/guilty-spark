@@ -10,13 +10,16 @@ Goal
 """
 
 import discord
-import matplotlib.pyplot as plt
 import time
 import os
 
 from guilty_spark.bot import Monitor
 from guilty_spark.plugin_system.plugin import Plugin
 from guilty_spark.plugin_system.data import plugin_file_path, CachedDict
+
+import matplotlib
+matplotlib.use('agg')
+import matplotlib.pyplot as plt
 
 
 def gen_image():
@@ -56,6 +59,10 @@ class SlothStats(Plugin):
 
         fig = plt.figure()
         ax = fig.gca()
+
+        if not y_axis:
+            y_axis.append(0)
+
         ax.set_yticks(range(max(y_axis) + 1))
 
         plt.bar(x_axis, y_axis)
