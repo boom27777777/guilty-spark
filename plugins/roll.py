@@ -13,7 +13,7 @@ dyn = Dynamic()
 
 @dyn.command()
 def roll(number):
-    """Roll the dice! """
+    """Roll the dice!"""
 
     try:
         number = int(number)

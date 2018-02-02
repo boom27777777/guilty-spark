@@ -3,7 +3,6 @@
 :Author:
     - Jackson McCrea (jacksonmccrea@gmail.com)
 """
-import asyncio
 import discord
 from collections import OrderedDict
 from guilty_spark.plugin_system.plugin import Plugin
@@ -33,7 +32,7 @@ class Dynamic:
 
     @staticmethod
     def _build_usage(cmd, args):
-        return 'Usage: {{}}{} {}'.format(
+        return '```Usage: {{}}{} {}```'.format(
             cmd, ' '.join('[{}]'.format(v) for v in args))
 
     def command(self, glob=False, context=False):
@@ -71,20 +70,37 @@ class Dynamic:
             def _prefix(self, string):
                 return string.format(self.bot.prefix)
 
-            @asyncio.coroutine
-            def help(self, command):
+            async def help(self, command):
                 command = self._strip_prefix(command)
                 _, hlp = cmds[command]
-                yield from self.bot.code(self._prefix(hlp))
 
-            @asyncio.coroutine
-            def on_command(self, command: str, message: discord.Message):
+                await self.bot.send_embed(
+                    self.build_embed(
+                        title=command.title(),
+                        description=self._prefix(hlp)
+                    )
+                )
+
+            async def on_command(self, command: str, message: discord.Message):
                 command = self._strip_prefix(command)
                 func, *_ = cmds[command]
                 try:
-                    yield from self.bot.say(func(message))
+                    result = func(message)
+
+                    if type(result) is str:
+                        await self.bot.say(result)
+
+                    elif type(result) is dict:
+                        await self.bot.send_embed(self.build_embed(**result))
+
                 except DynamicError as e:
-                    yield from self.bot.code(self._prefix(str(e)))
+                    await self.bot.send_embed(
+                        self.build_embed(
+                            title="Error!",
+                            description=self._prefix(str(e)),
+                            level=2
+                        )
+                    )
 
         return Plug
 
