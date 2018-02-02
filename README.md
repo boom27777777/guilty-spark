@@ -10,8 +10,12 @@ contained in a plugin.
 No more will you need to rewrite bot after bot to get the features you need. With the powerful plugin system you can
 access all features and functions of the bot.
 
-Required libraries
-------------------
-- discord python api
-- PyYaml
-- aioredis
+Installation Instructions
+-------------------------
+This bot allows for caching into a redis database.
+You can install redis from[here](https://redis.io/download)
+
+Then run in the project root.
+
+`pip install requirements.txt`
+
