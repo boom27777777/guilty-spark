@@ -131,15 +131,6 @@ class Monitor(discord.Client):
         ends = ['```' + language + '\n', '```']
         await self.say(message, ends=ends)
 
-    async def on_ready(self):
-        """ |coro|
-
-            Adds a line to the log with the bot's username and id
-            on a successful connection
-        """
-
-        logging.info('Connected as %s(%s)', self.user.name, self.user.id)
-
     async def call_hooks(self, dep: str, *args, **kwargs):
         """ |coro|
 
@@ -150,8 +141,18 @@ class Monitor(discord.Client):
             The dependency to test for
         """
         for plugin in self.callbacks.setdefault(dep, []):
-            if plugin.enabled:
+            if plugin.enabled or dep == 'on_ready':
                 await getattr(plugin, dep)(*args, **kwargs)
+
+    async def on_ready(self):
+        """ |coro|
+
+            Adds a line to the log with the bot's username and id
+            on a successful connection
+        """
+
+        logging.info('Connected as %s(%s)', self.user.name, self.user.id)
+        await self.call_hooks('on_ready')
 
     async def on_message(self, message: discord.Message):
         """ |coro|
