@@ -99,6 +99,10 @@ class Plugin:
 
         return embed
 
+    def on_ready(self):
+        """ on_ready discord.py hook """
+        pass
+
     def on_message(self, message: discord.Message):
         """ on_message discord.py hook """
         pass

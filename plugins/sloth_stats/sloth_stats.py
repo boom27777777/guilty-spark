@@ -12,12 +12,14 @@ Goal
 import discord
 import time
 import os
+import asyncio
 
 from guilty_spark.bot import Monitor
 from guilty_spark.plugin_system.plugin import Plugin
 from guilty_spark.plugin_system.data import plugin_file_path, CachedDict
 
 import matplotlib
+
 matplotlib.use('agg')
 import matplotlib.pyplot as plt
 
@@ -28,11 +30,33 @@ def gen_image():
     return path
 
 
+def numeric(string):
+    return ''.join([ch for ch in string if ch in '0123456789'])
+
+
+ROBAWK_CHICKEN_ID = '401025578766958593'
+
+
 class SlothStats(Plugin):
     def __init__(self, name, bot: Monitor):
         super().__init__(name, bot, commands=['slothstats'])
         self.rolls = CachedDict('slothrolls')
         self.bonus = CachedDict('slothbonus')
+        self.rates = CachedDict('slothrates')
+
+    async def on_load(self):
+        await self.rolls.load()
+        await self.bonus.load()
+        await self.rates.load()
+
+    async def on_ready(self):
+        while True:
+            await self.bot.send_message(
+                content='$slothgrinder',
+                destination=self.bot.get_channel('408915420557344768')
+            )
+            # Wait for a day
+            await asyncio.sleep(24 * 60 * 60)
 
     def roll_plot(self):
         x_axis = list(range(1, 100))
@@ -69,7 +93,7 @@ class SlothStats(Plugin):
         plt.title('Sloth Bonus rolls')
 
     async def on_message(self, message: discord.Message):
-        if not message.author.id == '401025578766958593':
+        if not message.author.id == ROBAWK_CHICKEN_ID:
             return
 
         if message.content.startswith('Rolled'):
@@ -93,6 +117,15 @@ class SlothStats(Plugin):
             self.bonus['MEGAWIN'] += 1
             await self.bonus.cache()
 
+        if 'sloths have been thrown to the grinder' in message.content:
+            sloths, *_ = message.content.split()
+            try:
+                sloths = int(numeric(sloths))
+                self.rates[time.strftime('%Y-%m-%d')] = sloths
+                await self.rates.cache()
+            except ValueError:
+                return
+
     async def send_image(self, message):
         image_path = gen_image()
         await self.bot.send_file(message.channel, image_path)
@@ -107,5 +140,3 @@ class SlothStats(Plugin):
         if sub_command == 'bonus':
             self.bonus_plot()
             await self.send_image(message)
-
-
