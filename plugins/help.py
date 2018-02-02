@@ -14,7 +14,11 @@ class Help(Plugin):
         self._padding = ''
 
     async def help(self, _):
-        await self.bot.code('Gives you helps \n' + usage)
+        embed = self.build_embed(
+            title='Halep friend',
+            description='Gives you helps\n' + usage
+        )
+        await self.bot.send_embed(embed)
 
     @property
     def _plugins(self):
@@ -47,22 +51,28 @@ class Help(Plugin):
         embed = self.build_embed(
             title='General Help',
             description=
-            'I am the Monitor of Installation 04. I am 343 Guilty Spark\n\n'
-            'Try !help [command] if you need specific help any command',
-            thumbnail='https://i.imgur.com/rJYfMZk.png'
+            '\n\n"I am the Monitor of Installation 04. I am 343 Guilty Spark"\n\n'
+            'Try `{0}help [command]` if you need specific help any command.\n'
+            'For example `{0}help help`'.format(self.bot.prefix),
         )
 
-        plugin_body = ''
         for name, plugin in self._plugins:
-            plugin_body += '  __**{}:**__\n'.format(name.title())
+            plugin_body = '```css\n'
 
             for command in plugin.commands:
-                plugin_body += await self.bot.commands[command].help(command)
-                plugin_body += '    {}{}\n'.format(self.bot.prefix, command)
+                plugin_body += '{}{}\n'.format(self.bot.prefix, command)
 
-            plugin_body += '\n'
+            plugin_body += '\n```'
 
-        embed.add_field(name='**Plugins**', value=plugin_body, inline=True)
+            embed.add_field(
+                name='`{}:`\n'.format(name.title()),
+                value=plugin_body,
+                inline=True
+            )
+            embed.set_footer(
+                text='Made with love by Boom#0001',
+                icon_url='https://i.imgur.com/a9hSk7i.png'
+            )
 
         await self.bot.send_embed(embed)
 
