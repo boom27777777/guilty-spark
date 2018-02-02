@@ -116,25 +116,7 @@ class Monitor(discord.Client):
             await self.send_message(
                 self.current_message.channel, message, ends=ends)
 
-    async def embed(self, title: str = None, message: str = None, fields: dict = None):
-        """ A wrapper for Discord's ritch embed system
-
-        :param title:
-            Title of embed
-        :param message:
-            Body of embed
-        :param fields:
-            A dict of title/descriptions
-        """
-
-        embed = discord.Embed()
-        embed.title = title
-        embed.description = message
-
-        if fields:
-            for k, v in fields.items():
-                embed.add_field(name=k, value=v)
-
+    async def send_embed(self, embed: discord.Embed):
         await super().send_message(self.current_message.channel, embed=embed)
 
     async def code(self, message: str, language=''):
@@ -232,7 +214,7 @@ class Monitor(discord.Client):
         await self.call_hooks('on_channel_create', channel)
 
     async def on_channel_update(self, before: discord.Channel,
-                          after: discord.Channel):
+                                after: discord.Channel):
         """ on_channel_update discord.py hook """
         await self.call_hooks('on_channel_update', before, after)
 
@@ -265,12 +247,12 @@ class Monitor(discord.Client):
         await self.call_hooks('on_server_role_create', role)
 
     async def on_server_role_updated(self, before: discord.Role,
-                               after: discord.Role):
+                                     after: discord.Role):
         """ on_server_role_updated discord.py hook """
         pass
 
     async def on_server_emojis_update(self, before: discord.Server,
-                                after: discord.Server):
+                                      after: discord.Server):
         """ on_server_em discord.py hook """
         await self.call_hooks('on_server_emojis_update', before, after)
 
@@ -283,7 +265,7 @@ class Monitor(discord.Client):
         await self.call_hooks('on_server_unavailable', server)
 
     async def on_voice_state_update(self, before: discord.Member,
-                              after: discord.Member):
+                                    after: discord.Member):
         """ on_voice_state_update discord.py hook """
         await self.call_hooks('on_voice_state_update', before, after)
 
@@ -296,7 +278,7 @@ class Monitor(discord.Client):
         await self.call_hooks('on_member_unban', server, user)
 
     async def on_typing(self, channel: discord.Channel, user: discord.User,
-                  when: datetime.datetime):
+                        when: datetime.datetime):
         """ on_typing discord.py hook """
         await self.call_hooks('on_typing', channel, user, when)
 
