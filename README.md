@@ -13,7 +13,7 @@ access all features and functions of the bot.
 Installation Instructions
 -------------------------
 This bot allows for caching into a redis database.
-You can install redis from[here](https://redis.io/download)
+You can install redis from [here](https://redis.io/download)
 
 Then run in the project root.
 
