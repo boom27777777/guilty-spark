@@ -63,7 +63,8 @@ class Plugin:
 
     @staticmethod
     def build_embed(title: str = None, description: str = None,
-                    fields: dict = None, thumbnail: str = None,
+                    fields: dict = None,
+                    thumbnail: str = 'https://i.imgur.com/rJYfMZk.png',
                     level: int = 0):
         """ A wrapper for Discord's ritch embed system
 
@@ -78,9 +79,9 @@ class Plugin:
         """
 
         colors = {
-            0: 0x007C00,
+            0: 0x227C22,
             1: 0x7C7C00,
-            2: 0x7C0000,
+            2: 0xFF2B2B,
         }
 
         embed = discord.Embed(
