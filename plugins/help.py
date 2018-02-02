@@ -13,9 +13,12 @@ class Help(Plugin):
         self._longest = 0
         self._padding = ''
 
-    @asyncio.coroutine
-    def help(self, _):
-        yield from self.bot.code('Gives you helps \n' + usage)
+    async def help(self, _):
+        embed = self.build_embed(
+            title='Halep friend',
+            description='Gives you helps\n' + usage
+        )
+        await self.bot.send_embed(embed)
 
     @property
     def _plugins(self):
@@ -44,36 +47,46 @@ class Help(Plugin):
 
         return cmds
 
-    def general_help(self):
-        name_fmt = self._row_format()
+    async def general_help(self):
+        embed = self.build_embed(
+            title='General Help',
+            description=
+            '\n\n"I am the Monitor of Installation 04. I am 343 Guilty Spark"\n\n'
+            'Try `{0}help [command]` if you need specific help any command.\n'
+            'For example `{0}help help`'.format(self.bot.prefix),
+        )
 
-        commands = [
-            'I am the Monitor of Installation 04. I am 343 Guilty Spark '
-            'Try !help [command] if you need specific help any command',
-            '\nThe commands available are:\n',
-            name_fmt.format('Plugin') + 'Command\n',
-            '-' * int(self._longest * 2.5)
-        ]
         for name, plugin in self._plugins:
-            if not plugin.commands:
-                continue
+            plugin_body = '```css\n'
 
-            commands += self._plugin_cmds(name, plugin, name_fmt)
+            for command in plugin.commands:
+                plugin_body += '{}{}\n'.format(self.bot.prefix, command)
 
-        return '\n'.join(commands)
+            plugin_body += '\n```'
 
-    def command_help(self, command):
+            embed.add_field(
+                name='`{}:`\n'.format(name.title()),
+                value=plugin_body,
+                inline=True
+            )
+            embed.set_footer(
+                text='Made with love by Boom#0001',
+                icon_url='https://i.imgur.com/a9hSk7i.png'
+            )
+
+        await self.bot.send_embed(embed)
+
+    async def command_help(self, command):
         if not command.startswith(self.bot.prefix):
             command = self.bot.prefix + command
 
         if command in self.bot.commands:
-            yield from self.bot.commands[command].help(command)
+            await self.bot.commands[command].help(command)
         else:
-            yield from self.bot.say(
+            await self.bot.say(
                 'I\'m not familiar with that command, curious')
 
-    @asyncio.coroutine
-    def on_command(self, _, message: discord.Message):
+    async def on_command(self, _, message: discord.Message):
         """ Prints the relevant help information
 
         :param message:
@@ -81,6 +94,6 @@ class Help(Plugin):
         """
         args = message.content.split()
         if len(args) == 1 or len(args) > 2:
-            yield from self.bot.code(self.general_help(), language='css')
+            await self.general_help()
         else:
-            yield from self.command_help(args[1])
+            await self.command_help(args[1])

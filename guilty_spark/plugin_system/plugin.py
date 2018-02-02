@@ -36,18 +36,16 @@ class Plugin:
         self._cache = CachedDict(self.name)
         self.disabled_channels = []
 
-    @asyncio.coroutine
-    def on_load(self):
-        data = yield from self._cache.load()
+    async def on_load(self):
+        data = await self._cache.load()
 
         if not data or not self._cache.setdefault('disabled_channels', []):
             self._cache['disabled_channels'] = []
 
         self.disabled_channels = self._cache['disabled_channels']
 
-    @asyncio.coroutine
-    def cache(self):
-        yield from self._cache.cache()
+    async def cache(self):
+        await self._cache.cache()
 
     def disable(self, channel_id):
         self.disabled_channels.append(channel_id)
@@ -62,6 +60,44 @@ class Plugin:
             if chan_id not in self.disabled_channels:
                 return True
         return False
+
+    @staticmethod
+    def build_embed(title: str = None, description: str = None,
+                    fields: dict = None,
+                    thumbnail: str = 'https://i.imgur.com/rJYfMZk.png',
+                    level: int = 0):
+        """ A wrapper for Discord's ritch embed system
+
+        :param title:
+            Title of embed
+        :param description:
+            Body of embed
+        :param fields:
+            A dict of title/descriptions
+        :param thumbnail:
+            Optional post thumbnail
+        """
+
+        colors = {
+            0: 0x227C22,
+            1: 0x7C7C00,
+            2: 0xFF2B2B,
+        }
+
+        embed = discord.Embed(
+            title=title,
+            description=description,
+            color=colors[level]
+        )
+
+        if thumbnail:
+            embed.set_thumbnail(url=thumbnail)
+
+        if fields:
+            for k, v in fields.items():
+                embed.add_field(name=k, value=v)
+
+        return embed
 
     def on_message(self, message: discord.Message):
         """ on_message discord.py hook """
@@ -164,9 +200,8 @@ class Plugin:
         """ on_group_remove discord.py hook """
         pass
 
-    @asyncio.coroutine
-    def help(self, command: str):
-        yield from self.bot.say("Help hasn't been added for this command yet")
+    async def help(self, command: str):
+        await self.bot.say("Help hasn't been added for this command yet")
 
     def __repr__(self):
         return self.name

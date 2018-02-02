@@ -34,4 +34,8 @@ def gif(*search):
         gif_url = gifs[gif_id]['images']['downsized_medium']['url']
         return gif_url
     else:
-        return 'No gifs found, today is a sad day.'
+        return {
+            'title': 'Disappointment',
+            'description': 'No gifs found, today is a sad day.',
+            'level': 2
+        }
