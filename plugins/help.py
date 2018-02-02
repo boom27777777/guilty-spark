@@ -55,9 +55,9 @@ class Help(Plugin):
         plugin_body = ''
         for name, plugin in self._plugins:
             plugin_body += '  __**{}:**__\n'.format(name.title())
-            plugin_body += await self.bot.commands[command].help(command)
 
             for command in plugin.commands:
+                plugin_body += await self.bot.commands[command].help(command)
                 plugin_body += '    {}{}\n'.format(self.bot.prefix, command)
 
             plugin_body += '\n'
