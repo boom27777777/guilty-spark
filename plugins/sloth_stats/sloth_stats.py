@@ -130,6 +130,10 @@ class SlothStats(Plugin):
         x_axis = x_axis[1:]
         y_axis = [y - x for x, y in zip(y_axis[:-1], y_axis[1:])]
 
+        if not x_axis or not y_axis:
+            plt.title('Not enough carnage, please wait')
+            return
+
         if not y_axis:
             y_axis.append(0)
 
