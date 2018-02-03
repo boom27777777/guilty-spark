@@ -1,4 +1,4 @@
-"""
+'''
 :Date: 2018-01-31
 :Version: 0.0.1
 :Author:
@@ -7,7 +7,7 @@
 Goal
 ----
     Stats for @Chickenstew's discord bot
-"""
+'''
 
 import discord
 import time
@@ -92,6 +92,36 @@ class SlothStats(Plugin):
         plt.bar(x_axis, y_axis)
         plt.title('Sloth Bonus rolls')
 
+    def ground_plot(self):
+        x_axis = sorted([k for k in self.rates])
+        y_axis = []
+        for i in x_axis:
+            y_axis.append(self.rates[i])
+
+        # Calculate deltas
+        x_axis = x_axis[1:]
+        y_axis = [y - x for x, y in zip(y_axis[:-1], y_axis[1:])]
+
+        if not y_axis:
+            y_axis.append(0)
+
+        average = []
+
+        total = 0
+        for i, x in enumerate(y_axis):
+            if i > 0:
+                total -= total / i
+                total += x / i
+            else:
+                total = x
+            average.append(total)
+
+        plt.plot(x_axis, average, 'r--')
+        plt.bar(x_axis, y_axis)
+        plt.xlabel('Days')
+        plt.ylabel('Ground Sloths')
+        plt.title('Oh the slothmanity!')
+
     async def on_message(self, message: discord.Message):
         if not message.author.id == ROBAWK_CHICKEN_ID:
             return
@@ -139,4 +169,8 @@ class SlothStats(Plugin):
 
         if sub_command == 'bonus':
             self.bonus_plot()
+            await self.send_image(message)
+
+        if sub_command == 'grinder':
+            self.ground_plot()
             await self.send_image(message)
