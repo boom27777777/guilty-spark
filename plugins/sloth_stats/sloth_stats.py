@@ -91,7 +91,7 @@ class SlothStats(Plugin):
         y_axis = []
 
         for i in x_axis:
-            y_axis.append(self.rolls.setdefault(i, 0))
+            y_axis.append(self.rolls.setdefault(str(i), 0))
 
         fig = plt.figure()
         ax = fig.gca()
