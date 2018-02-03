@@ -44,6 +44,34 @@ class SlothStats(Plugin):
         self.bonus = CachedDict('slothbonus')
         self.rates = CachedDict('slothrates')
 
+    async def help(self, command: str):
+        embed = self.build_embed(
+            title='Stats for Sloths',
+            description='A simple utility to help visualize sloth brutality.\n'
+                        'USAGE: `{}slothstats [subcommand]`\n\n'
+                        'Sub commands:'.format(self.bot.prefix),
+        )
+        embed.add_field(
+            name='`rolls`',
+            value='Shows a scatter plot of all rolls and '
+                  'their frequency.\n\n',
+            inline=True
+        )
+
+        embed.add_field(
+            name='`bonus`',
+            value='Shows the rate of MEGAWIN and TAXMAN\n\n',
+            inline=True
+        )
+
+        embed.add_field(
+            name='`grinder`',
+            value='Shows the daily rate of sloth consumption\n\n',
+            inline=True
+        )
+
+        await self.bot.send_embed(embed)
+
     async def on_load(self):
         await self.rolls.load()
         await self.bonus.load()
