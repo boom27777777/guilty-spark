@@ -188,6 +188,7 @@ class SlothStats(Plugin):
         image_path = gen_image()
         await self.bot.send_file(message.channel, image_path)
         os.remove(image_path)
+        plt.clf()
 
     async def on_command(self, command, message: discord.Message):
         sub_command, *args = message.content.replace(command, '').split()
