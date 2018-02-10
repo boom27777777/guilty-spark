@@ -150,6 +150,14 @@ class SlothStats(Plugin):
 
         plt.plot(x_axis, average, 'r--')
         plt.bar(x_axis, y_axis)
+
+        fig, ax = plt.subplot()
+
+        if len(ax.xaxis.get_ticklabels()) > 10:
+            for label in ax.xaxis.get_ticklabels()[::len(x_axis) / 2]:
+                label.set_visible(False)
+
+        plt.xticks(rotation=45)
         plt.xlabel('Days')
         plt.ylabel('Ground Sloths')
         plt.title('Oh the slothmanity!')
