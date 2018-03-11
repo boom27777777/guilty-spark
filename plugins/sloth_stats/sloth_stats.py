@@ -26,7 +26,7 @@ import matplotlib.pyplot as plt
 
 def gen_image():
     path = plugin_file_path('graph{}.png'.format(time.time()))
-    plt.savefig(plugin_file_path(path))
+    plt.savefig(plugin_file_path(path), pad_inches=0.5)
     return path
 
 
@@ -142,8 +142,8 @@ class SlothStats(Plugin):
         total = 0
         for i, x in enumerate(y_axis):
             if i > 0:
-                total -= total / i
-                total += x / i
+                total -= total / 10
+                total += x / 10
             else:
                 total = x
             average.append(total)
@@ -151,11 +151,11 @@ class SlothStats(Plugin):
         plt.plot(x_axis, average, 'r--')
         plt.bar(x_axis, y_axis)
 
-        fig, ax = plt.subplot()
+        ax = plt.subplot()
 
-        if len(ax.xaxis.get_ticklabels()) > 10:
-            for label in ax.xaxis.get_ticklabels()[::len(x_axis) / 2]:
-                label.set_visible(False)
+#        if len(ax.xaxis.get_ticklabels()) > 10:
+#            for label in ax.xaxis.get_ticklabels()[::len(x_axis) / 2]:
+#                label.set_visible(False)
 
         plt.xticks(rotation=45)
         plt.xlabel('Days')
