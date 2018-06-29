@@ -216,14 +216,30 @@ class Memes(Plugin):
         return dank, maymay
 
     async def search_memes(self, content):
-        content = ' '.join(content.split()[1:])
+        shit_post = ' '.join(content.split()[1:])
         if not content:
             await self.bot.code(usage)
             return
 
-        dank, meme = self.get_meme(content)
-        dank = dank.replace('```', '')
-        await self.bot.code('+{:<25}| {}'.format(meme, dank), language='diff')
+        memes = self.memes
+        steaming_load = []
+        for meme, autism in memes['is'].items():
+            if meme == shit_post:
+                steaming_load.append('[is] {:<25}| {}'.format(meme, autism))
+
+        for meme, autism in memes['in'].items():
+            if meme in shit_post:
+                steaming_load.append('[in] {:<25}| {}'.format(meme, autism))
+
+        for meme, autism in memes['is'].items():
+            try:
+                if re.search(meme, shit_post):
+                    steaming_load.append('[re] {:<25}| {}'.format(meme, autism))
+            except:
+                self.delete_meme(meme)
+
+        steaming_load = '+' + '\n-'.join(steaming_load).replace('```', '')
+        await self.bot.code(steaming_load, language='diff')
 
     async def copy_memes(self, message: discord.Message):
         if int(message.author.id) != self.bot.settings['owner']:
