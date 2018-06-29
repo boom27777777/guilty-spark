@@ -87,6 +87,7 @@ class Monitor(discord.Client):
         if len(content) > limit:
             parts = slice_message(
                 limit, content, ends)
+
             for part in parts:
                 await super().send_message(
                     destination, part, *args, tts=tts)
@@ -130,15 +131,6 @@ class Monitor(discord.Client):
         ends = ['```' + language + '\n', '```']
         await self.say(message, ends=ends)
 
-    async def on_ready(self):
-        """ |coro|
-
-            Adds a line to the log with the bot's username and id
-            on a successful connection
-        """
-
-        logging.info('Connected as %s(%s)', self.user.name, self.user.id)
-
     async def call_hooks(self, dep: str, *args, **kwargs):
         """ |coro|
 
@@ -149,12 +141,18 @@ class Monitor(discord.Client):
             The dependency to test for
         """
         for plugin in self.callbacks.setdefault(dep, []):
-            if plugin.enabled:
-                try:
-                    await getattr(plugin, dep)(*args, **kwargs)
-                except BaseException as e:
-                    logging.error('Plugin {} threw an exception'.format(plugin))
-                    raise e
+            if plugin.enabled or dep == 'on_ready':
+                await getattr(plugin, dep)(*args, **kwargs)
+
+    async def on_ready(self):
+        """ |coro|
+
+            Adds a line to the log with the bot's username and id
+            on a successful connection
+        """
+
+        logging.info('Connected as %s(%s)', self.user.name, self.user.id)
+        await self.call_hooks('on_ready')
 
     async def on_message(self, message: discord.Message):
         """ |coro|
@@ -188,20 +186,13 @@ class Monitor(discord.Client):
             # Test our available commands for a matching signature and pass
             # the message onto the appropriate plugin on_command hook
             command, *_ = message.content.split()
-
-            plugin = None
             try:
                 plugin = self.commands[command]
+                if plugin.enabled:
+                    await plugin.on_command(command, message)
             except KeyError:
                 pass
 
-            if plugin and plugin.enabled:
-                try:
-                    await plugin.on_command(command, message)
-                except BaseException as e:
-                    logging.error('Command {} in Plugin {} threw an error'.format(
-                        plugin, command))
-                    raise e
             return
 
         # Run all on_message hooks

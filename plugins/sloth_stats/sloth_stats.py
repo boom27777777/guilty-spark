@@ -1,4 +1,4 @@
-"""
+'''
 :Date: 2018-01-31
 :Version: 0.0.1
 :Author:
@@ -7,25 +7,34 @@
 Goal
 ----
     Stats for @Chickenstew's discord bot
-"""
+'''
 
 import discord
 import time
 import os
+import asyncio
 
 from guilty_spark.bot import Monitor
 from guilty_spark.plugin_system.plugin import Plugin
 from guilty_spark.plugin_system.data import plugin_file_path, CachedDict
 
 import matplotlib
+
 matplotlib.use('agg')
 import matplotlib.pyplot as plt
 
 
 def gen_image():
     path = plugin_file_path('graph{}.png'.format(time.time()))
-    plt.savefig(plugin_file_path(path))
+    plt.savefig(plugin_file_path(path), pad_inches=0.5)
     return path
+
+
+def numeric(string):
+    return ''.join([ch for ch in string if ch in '0123456789'])
+
+
+ROBAWK_CHICKEN_ID = '401025578766958593'
 
 
 class SlothStats(Plugin):
@@ -33,13 +42,56 @@ class SlothStats(Plugin):
         super().__init__(name, bot, commands=['slothstats'])
         self.rolls = CachedDict('slothrolls')
         self.bonus = CachedDict('slothbonus')
+        self.rates = CachedDict('slothrates')
+
+    async def help(self, command: str):
+        embed = self.build_embed(
+            title='Stats for Sloths',
+            description='A simple utility to help visualize sloth brutality.\n'
+                        'USAGE: `{}slothstats [subcommand]`\n\n'
+                        'Sub commands:'.format(self.bot.prefix),
+        )
+        embed.add_field(
+            name='`rolls`',
+            value='Shows a scatter plot of all rolls and '
+                  'their frequency.\n\n',
+            inline=True
+        )
+
+        embed.add_field(
+            name='`bonus`',
+            value='Shows the rate of MEGAWIN and TAXMAN\n\n',
+            inline=True
+        )
+
+        embed.add_field(
+            name='`grinder`',
+            value='Shows the daily rate of sloth consumption\n\n',
+            inline=True
+        )
+
+        await self.bot.send_embed(embed)
+
+    async def on_load(self):
+        await self.rolls.load()
+        await self.bonus.load()
+        await self.rates.load()
+
+    async def on_ready(self):
+        while True:
+            await self.bot.send_message(
+                content='$slothgrinder',
+                destination=self.bot.get_channel('408915420557344768')
+            )
+            # Wait for a day
+            await asyncio.sleep(24 * 60 * 60)
 
     def roll_plot(self):
         x_axis = list(range(1, 100))
         y_axis = []
 
         for i in x_axis:
-            y_axis.append(self.rolls.setdefault(i, 0))
+            y_axis.append(self.rolls.setdefault(str(i), 0))
 
         fig = plt.figure()
         ax = fig.gca()
@@ -68,8 +120,50 @@ class SlothStats(Plugin):
         plt.bar(x_axis, y_axis)
         plt.title('Sloth Bonus rolls')
 
+    def ground_plot(self):
+        x_axis = sorted([k for k in self.rates])
+        y_axis = []
+        for i in x_axis:
+            y_axis.append(self.rates[i])
+
+        # Calculate deltas
+        x_axis = x_axis[1:]
+        y_axis = [y - x for x, y in zip(y_axis[:-1], y_axis[1:])]
+
+        if not x_axis or not y_axis:
+            plt.title('Not enough carnage, please wait')
+            return
+
+        if not y_axis:
+            y_axis.append(0)
+
+        average = []
+
+        total = 0
+        for i, x in enumerate(y_axis):
+            if i > 0:
+                total -= total / 10
+                total += x / 10
+            else:
+                total = x
+            average.append(total)
+
+        plt.plot(x_axis, average, 'r--')
+        plt.bar(x_axis, y_axis)
+
+        ax = plt.subplot()
+
+#        if len(ax.xaxis.get_ticklabels()) > 10:
+#            for label in ax.xaxis.get_ticklabels()[::len(x_axis) / 2]:
+#                label.set_visible(False)
+
+        plt.xticks(rotation=45)
+        plt.xlabel('Days')
+        plt.ylabel('Ground Sloths')
+        plt.title('Oh the slothmanity!')
+
     async def on_message(self, message: discord.Message):
-        if not message.author.id == '401025578766958593':
+        if not message.author.id == ROBAWK_CHICKEN_ID:
             return
 
         if message.content.startswith('Rolled'):
@@ -93,10 +187,20 @@ class SlothStats(Plugin):
             self.bonus['MEGAWIN'] += 1
             await self.bonus.cache()
 
+        if 'sloths have been thrown to the grinder' in message.content:
+            sloths, *_ = message.content.split()
+            try:
+                sloths = int(numeric(sloths))
+                self.rates[time.strftime('%Y-%m-%d')] = sloths
+                await self.rates.cache()
+            except ValueError:
+                return
+
     async def send_image(self, message):
         image_path = gen_image()
         await self.bot.send_file(message.channel, image_path)
         os.remove(image_path)
+        plt.clf()
 
     async def on_command(self, command, message: discord.Message):
         sub_command, *args = message.content.replace(command, '').split()
@@ -108,4 +212,6 @@ class SlothStats(Plugin):
             self.bonus_plot()
             await self.send_image(message)
 
-
+        if sub_command == 'grinder':
+            self.ground_plot()
+            await self.send_image(message)
