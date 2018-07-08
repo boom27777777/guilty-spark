@@ -171,7 +171,7 @@ class Monitor(discord.Client):
         if voice_chan.id in self.sounds:
             self.sounds[voice_chan.id].stop()
 
-    def get_volume(self, target):
+    def get_volume(self):
         voice_chan = self.current_message.author.voice.voice_channel
         if voice_chan.id in self.sounds:
             return self.sounds[voice_chan.id].volume
