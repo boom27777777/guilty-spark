@@ -44,7 +44,7 @@ class Sound(Plugin):
             await self.help(message)
 
         elif args[0] == 'stop':
-            await self.bot.stop_sound(message.author)
+            await self.bot.stop_sound()
 
         elif args[0] == 'volume':
             if len(args) == 2:
