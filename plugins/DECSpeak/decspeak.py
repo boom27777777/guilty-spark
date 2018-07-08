@@ -119,7 +119,7 @@ class DECSpeak(Plugin):
         # not perfect but who cares
         rand = str(randint(0,99999))
         # store user input into a txt and pass it through std input
-        inputname = rand + user.display_name + 'request.txt'
+        inputname = rand + user.id + 'request.txt'
         inputpath = plugin_file(inputname, 'w')
         inputpath.write(text)
         inputpath = plugin_file_path(inputname)
