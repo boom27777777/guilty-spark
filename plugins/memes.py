@@ -103,7 +103,7 @@ class Memes(Plugin):
                 '-Examples:',
                 '+    !bindmeme is||kthx||bai <user>',
                 '+    !bindmeme re||(?i)regex||Case insensitive meme!',
-             ]), language='diff')
+            ]), language='diff')
         return
 
     async def bind_meme(self, content: str):
@@ -324,4 +324,11 @@ class Memes(Plugin):
             if re.search(r'<(user|channel|server)>', dank):
                 dank = self.format_tag(dank, message)
 
-            await self.bot.say(dank)
+            if dank.startswith('<speak>'):
+                await self.bot.plugin_message(**{
+                    'speak-message': dank,
+                    'user': message.author
+                })
+
+            else:
+                await self.bot.say(dank)

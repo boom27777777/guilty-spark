@@ -1,4 +1,3 @@
-
 import discord
 import os
 
@@ -6,6 +5,7 @@ from random import randint
 
 from guilty_spark.plugin_system.plugin import Plugin
 from guilty_spark.plugin_system.data import plugin_file_path, plugin_file
+
 
 class DECSpeak(Plugin):
     def __init__(self, name: str, bot):
@@ -25,7 +25,8 @@ class DECSpeak(Plugin):
             )
             embed.add_field(
                 name='Phonemes:',
-                value='```_,aa,ae,ah,ao,aw,ax,ay,b,ch,d,dh,dx,eh,el,en,ey,f,g,hx,ih,ix,iy,jh,k,l,lx,m,n,nx,ow,oy,p,q,r,rr,rx,s,sh,t,th,tx,uh,uw,v,w,yu,yx,z,zh```',
+                value='```_,aa,ae,ah,ao,aw,ax,ay,b,ch,d,dh,dx,eh,el,en,ey,f,g,hx,ih,ix,iy,jh,k,l,lx,m,n,nx,ow,oy,p,q,r,'
+                      'rr,rx,s,sh,t,th,tx,uh,uw,v,w,yu,yx,z,zh```',
                 inline=True
             )
         else:
@@ -110,22 +111,20 @@ class DECSpeak(Plugin):
                           'zh    a_z_ure```'
                 )
 
-
-
         await self.bot.send_embed(embed)
 
     async def speak(self, user, channel, text):
         # avoid trampling a file if a user requests too much too fast
         # not perfect but who cares
-        rand = str(randint(0,99999))
+        rand = str(randint(0, 99999))
         # store user input into a txt and pass it through std input
         inputname = rand + user.id + 'request.txt'
         inputpath = plugin_file(inputname, 'w')
         inputpath.write(text)
         inputpath = plugin_file_path(inputname)
-        soundpath = plugin_file_path(rand + user.display_name + 'shitpost.wav')
+        soundpath = plugin_file_path(rand + user.id + 'shitpost.wav')
         print(soundpath)
-        command = 'wine ./plugins/DECSpeak/say.exe -pre "[:phoneme on]" -w "'+soundpath+'" <'+inputpath
+        command = 'wine ./plugins/DECSpeak/say.exe -pre "[:phoneme on]" -w "' + soundpath + '" <' + inputpath
         print(command)
         os.system(command)
         await self.bot.play_sound(soundpath)
@@ -135,7 +134,12 @@ class DECSpeak(Plugin):
         os.remove(inputpath)
         os.remove(soundpath)
 
-
     async def on_command(self, command, message: discord.Message):
         text = message.content.replace(command, '').strip()
         await self.speak(message.author, message.channel, text)
+
+    async def on_plugin_message(self, *args, **kwargs):
+        message = kwargs.setdefault('speak-message', None)
+        user = kwargs.setdefault('user', None)
+        if message and user:
+            await self.speak(user, None, message)
