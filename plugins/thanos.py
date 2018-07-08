@@ -10,6 +10,7 @@ from random import randint
 from guilty_spark.plugin_system.data import CachedDict
 from guilty_spark.plugin_system.plugin import Plugin
 
+
 class Thanos(Plugin):
     def __init__(self, name: str, bot):
         super().__init__(name, bot, commands=['thanos'])
@@ -20,7 +21,7 @@ class Thanos(Plugin):
         embed = self.build_embed(
             title='Face Thanos\' judgement',
             description='Sub commands:\n'
-            '  `list`  Remember the fallen'
+                        '  `list`  Remember the fallen'
         )
         await self.bot.send_embed(embed)
 
