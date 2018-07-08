@@ -180,6 +180,7 @@ class Monitor(discord.Client):
 
     def set_volume(self, volume):
         voice_chan = self.current_message.author.voice.voice_channel
+        self.volume = volume
         if voice_chan.id in self.sounds:
             self.sounds[voice_chan.id].volume = volume
 
