@@ -1,0 +1,1 @@
+from .decspeak import DECSpeak
