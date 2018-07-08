@@ -76,12 +76,12 @@ class Help(Plugin):
 
         await self.bot.send_embed(embed)
 
-    async def command_help(self, command):
+    async def command_help(self, command, message):
         if not command.startswith(self.bot.prefix):
             command = self.bot.prefix + command
 
         if command in self.bot.commands:
-            await self.bot.commands[command].help(command)
+            await self.bot.commands[command].help(message)
         else:
             await self.bot.say(
                 'I\'m not familiar with that command, curious')
@@ -93,7 +93,7 @@ class Help(Plugin):
             The message to respond to
         """
         args = message.content.split()
-        if len(args) == 1 or len(args) > 2:
+        if len(args) == 1:
             await self.general_help()
         else:
-            await self.command_help(args[1])
+            await self.command_help(args[1], message)
