@@ -326,7 +326,7 @@ class Memes(Plugin):
 
             if dank.startswith('<speak>'):
                 await self.bot.plugin_message(**{
-                    'speak-message': dank,
+                    'speak-message': dank.replace('<speak>', ''),
                     'user': message.author
                 })
 
