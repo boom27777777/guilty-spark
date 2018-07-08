@@ -1,3 +1,4 @@
+import asyncio
 import datetime
 import discord
 import logging
@@ -35,6 +36,7 @@ class Monitor(discord.Client):
 
         self.prefix = self.settings['command_prefix']
         self.current_message = None
+        self.sounds = {}
 
     async def login(self, *args):
         """ Send the initial login payload"""
@@ -130,6 +132,42 @@ class Monitor(discord.Client):
 
         ends = ['```' + language + '\n', '```']
         await self.say(message, ends=ends)
+
+    async def play_sound(self, file_path, target: discord.User):
+        """ Play a sound file with ffmpeg in the user's voice channel
+
+        :param file_path:
+            The file path to play
+        :param target:
+            The user who's channel you want to join
+        """
+
+        voice_chan = target.voice.voice_channel
+        try:
+            voice = await self.join_voice_channel(voice_chan)
+        except discord.errors.ClientException:
+            voice = [v for v in self.voice_clients if v.channel == voice_chan][0]
+
+        player = voice.create_ffmpeg_player(file_path)
+        self.sounds[voice_chan.id] = player
+        player.start()
+
+        while player.is_playing():
+            await asyncio.sleep(0.1)
+
+        await voice.disconnect()
+        del self.sounds[voice_chan.id]
+
+    async def stop_sound(self, target: discord.User):
+        """ Stops the currently playing sound in the user's channel
+
+        :param target:
+            The user who's channel you want to stop sounds in
+        """
+
+        voice_chan = target.voice.voice_channel
+        if voice_chan.id in self.sounds:
+            self.sounds[voice_chan.id].stop()
 
     async def call_hooks(self, dep: str, *args, **kwargs):
         """ |coro|
