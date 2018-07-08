@@ -15,10 +15,13 @@ class Sound(Plugin):
     async def help(self, msg):
         embed = self.build_embed(
             title='Sound manager',
-            description='Manages outing sounds'
+            description='Manages outing sounds\n\n'
+                        '**Usage**: `{}sound [subcommand]`\n\n'
+                        '**Subcommands**:'.format(self.bot.prefix)
         )
 
-        embed.add_field('commands', '`stop` stop running sounds')
+        embed.add_field(name='`stop`', value='stop running sounds')
+        embed.add_field(name='`volume [1-100]`', value='set bot volume `1-100`')
 
         await self.bot.send_embed(embed)
 
