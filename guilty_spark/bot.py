@@ -37,6 +37,7 @@ class Monitor(discord.Client):
         self.prefix = self.settings['command_prefix']
         self.current_message = None
         self.sounds = {}
+        self.volume = 1.0
 
     async def login(self, *args):
         """ Send the initial login payload"""
@@ -133,7 +134,7 @@ class Monitor(discord.Client):
         ends = ['```' + language + '\n', '```']
         await self.say(message, ends=ends)
 
-    async def play_sound(self, file_path, target: discord.User):
+    async def play_sound(self, file_path):
         """ Play a sound file with ffmpeg in the user's voice channel
 
         :param file_path:
@@ -142,7 +143,7 @@ class Monitor(discord.Client):
             The user who's channel you want to join
         """
 
-        voice_chan = target.voice.voice_channel
+        voice_chan = self.current_message.author.voice.voice_channel
         try:
             voice = await self.join_voice_channel(voice_chan)
         except discord.errors.ClientException:
@@ -150,6 +151,7 @@ class Monitor(discord.Client):
 
         player = voice.create_ffmpeg_player(file_path)
         self.sounds[voice_chan.id] = player
+        player.volume = self.volume
         player.start()
 
         while player.is_playing():
@@ -158,16 +160,28 @@ class Monitor(discord.Client):
         await voice.disconnect()
         del self.sounds[voice_chan.id]
 
-    async def stop_sound(self, target: discord.User):
+    async def stop_sound(self):
         """ Stops the currently playing sound in the user's channel
 
         :param target:
             The user who's channel you want to stop sounds in
         """
 
-        voice_chan = target.voice.voice_channel
+        voice_chan = self.current_message.author.voice.voice_channel
         if voice_chan.id in self.sounds:
             self.sounds[voice_chan.id].stop()
+
+    def get_volume(self, target):
+        voice_chan = self.current_message.author.voice.voice_channel
+        if voice_chan.id in self.sounds:
+            return self.sounds[voice_chan.id].volume
+        else:
+            return 0.0
+
+    def set_volume(self, volume):
+        voice_chan = self.current_message.author.voice.voice_channel
+        if voice_chan.id in self.sounds:
+            self.sounds[voice_chan.id].volume = volume
 
     async def call_hooks(self, dep: str, *args, **kwargs):
         """ |coro|
