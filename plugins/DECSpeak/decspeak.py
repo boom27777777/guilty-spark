@@ -128,7 +128,7 @@ class DECSpeak(Plugin):
         command = 'wine ./plugins/DECSpeak/say.exe -pre "[:phoneme on]" -w "'+soundpath+'" <'+inputpath
         print(command)
         os.system(command)
-        await self.bot.play_sound(soundpath, user)
+        await self.bot.play_sound(soundpath)
         # soundpath = plugin_file(soundpath, 'r')
         # await self.bot.send_file(channel, soundpath)
         # hopefully we don't delete the file before it finishes trying to play it!
