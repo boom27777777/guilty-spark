@@ -38,10 +38,12 @@ class Thanos(Plugin):
         alive = []
         fallen = []
         for user in self.list:
-            name = server.get_member(user).display_name
+            name = server.get_member(user)
 
             if not name:
                 continue
+
+            name = name.display_name
 
             if self.list[user]:
                 alive.append(name)
