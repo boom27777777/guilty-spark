@@ -147,7 +147,7 @@ class Monitor(discord.Client):
         try:
             voice = await self.join_voice_channel(voice_chan)
         except discord.errors.ClientException:
-            voice = [v for v in self.voice_clients if v.channel == voice_chan][0]
+            return
 
         if not voice:
             return
