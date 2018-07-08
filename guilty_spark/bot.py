@@ -149,6 +149,9 @@ class Monitor(discord.Client):
         except discord.errors.ClientException:
             voice = [v for v in self.voice_clients if v.channel == voice_chan][0]
 
+        if not voice:
+            return
+
         player = voice.create_ffmpeg_player(file_path)
         self.sounds[voice_chan.id] = player
         player.volume = self.volume
