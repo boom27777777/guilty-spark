@@ -154,7 +154,10 @@ class Monitor(discord.Client):
         if not voice:
             return
 
-        player = voice.create_ffmpeg_player(file_path)
+        player = voice.create_ffmpeg_player(
+            file_path,
+            options='-filter:a loudnorm'
+        )
         self.sounds[voice_chan.id] = player
         player.volume = self.volume
         player.start()
