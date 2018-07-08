@@ -204,6 +204,10 @@ class Plugin:
         """ on_group_remove discord.py hook """
         pass
 
+    def on_plugin_message(self, *args, **kwargs):
+        """ Internal plugin message passing """
+        pass
+
     async def help(self, command: str):
         await self.bot.say("Help hasn't been added for this command yet")
 

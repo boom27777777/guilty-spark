@@ -343,3 +343,7 @@ class Monitor(discord.Client):
     async def on_group_remove(self, channel: discord.Channel, user: discord.User):
         """ on_group_remove discord.py hook """
         await self.call_hooks('on_group_remove', channel, user)
+
+    async def plugin_message(self, *args, **kwargs):
+        """ Internal Plugin communication """
+        await self.call_hooks('on_plugin_message', *args, **kwargs)
