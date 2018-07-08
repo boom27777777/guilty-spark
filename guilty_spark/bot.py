@@ -147,6 +147,8 @@ class Monitor(discord.Client):
         try:
             voice = await self.join_voice_channel(voice_chan)
         except discord.errors.ClientException:
+            logging.warning('Sound already playing in channel {}'.format(
+                voice_chan.name))
             return
 
         if not voice:
