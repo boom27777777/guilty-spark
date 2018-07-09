@@ -70,7 +70,7 @@ class Help(Plugin):
                 inline=True
             )
             embed.set_footer(
-                text='Made with love by Boom#0001',
+                text='Made with love by Boom#0042',
                 icon_url='https://i.imgur.com/a9hSk7i.png'
             )
 
