@@ -46,6 +46,7 @@ class RSS(Plugin):
             name='`list`',
             value='Lists registered feeds`'
         )
+        await self.bot.send_embed(embed)
 
     async def on_ready(self):
         await self.feeds.load()
