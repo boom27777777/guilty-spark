@@ -119,8 +119,15 @@ class Monitor(discord.Client):
             await self.send_message(
                 self.current_message.channel, message, ends=ends)
 
-    async def send_embed(self, embed: discord.Embed):
-        await super().send_message(self.current_message.channel, embed=embed)
+    async def send_embed(self, embed: discord.Embed, channel=None):
+        if type(channel) is str:
+            for chan in self.get_all_channels():
+                if chan.id == channel:
+                    channel = chan
+        if channel:
+            await super().send_message(channel, embed=embed)
+        else:
+            await super().send_message(self.current_message.channel, embed=embed)
 
     async def code(self, message: str, language=''):
         """ Wrap a **bot.say()** message in a code block
