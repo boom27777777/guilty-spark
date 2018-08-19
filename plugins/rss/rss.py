@@ -99,5 +99,5 @@ class RSS(Plugin):
             else:
                 await self.list(args[0])
 
-        if message.author.id == self.bot.owner and subcommand == 'force-update':
+        if str(message.author.id) == self.bot.settings['owner'] and subcommand == 'force-update':
             await self.update_feeds()
