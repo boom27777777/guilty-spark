@@ -29,6 +29,24 @@ class RSS(Plugin):
         super().__init__(name, bot, commands=['rss'])
         self.feeds = CachedDict('rss-feeds')
 
+    async def help(self, command: str):
+        embed = self.build_embed(
+            title='RSS Feeds',
+            description='Tracks RSS feeds, and gives you updates\n\n'
+                        '**Usage**: `{}rss [subcommand]`\n\n'
+                        '**Subcommands**:'.format(self.bot.prefix)
+        )
+
+        embed.add_field(
+            name='`register [Feed Link]`',
+            value='Adds a new feed to this channel'
+        )
+
+        embed.add_field(
+            name='`list`',
+            value='Lists registered feeds`'
+        )
+
     async def on_ready(self):
         await self.feeds.load()
 
