@@ -39,12 +39,14 @@ class RSS(Plugin):
 
         embed.add_field(
             name='`register [Feed Link]`',
-            value='Adds a new feed to this channel'
+            value='Adds a new feed to this channel',
+            inline=False
         )
 
         embed.add_field(
             name='`list`',
-            value='Lists registered feeds`'
+            value='Lists registered feeds',
+            inline=False
         )
         await self.bot.send_embed(embed)
 
