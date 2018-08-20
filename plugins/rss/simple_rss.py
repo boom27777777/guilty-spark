@@ -13,7 +13,7 @@ import html
 import re
 
 
-def get_tags(raw, needle):
+def get_tags(raw, needle, strip_tag=True):
     """ Naive XML Parser that builds a list of **needle** tags, and returns the contents
 
     :param raw: The XML to parse
@@ -56,7 +56,10 @@ def get_tags(raw, needle):
 
                 if tag.strip('< >') == '/' + needle:
                     in_body = False
-                    tags.append(body.replace(tag, '').strip())
+                    if strip_tag:
+                        tags.append(body.replace(tag, '').strip())
+                    else:
+                        tags.append(tag.strip() + body.strip())
 
     return tags
 
@@ -86,12 +89,19 @@ def unwrap(lst):
 
 
 def parse_item(raw_item):
-    return {
+    item = {
         'title': unwrap(get_tags(raw_item, 'title')),
         'link': unwrap(get_tags(raw_item, 'link')),
         'description': unwrap(get_tags(raw_item, 'description')),
-        'date': unwrap(get_tags(raw_item, 'pubDate'))
+        'date': unwrap(get_tags(raw_item, 'pubDate')),
     }
+
+    try:
+        item['image'] = re.search('<media:content.*url=\"([^\"]*)\"', raw_item).group(1)
+    except AttributeError:
+        item['image'] = ''
+
+    return item
 
 
 def get_items(raw_feed):
