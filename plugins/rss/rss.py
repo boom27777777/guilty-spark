@@ -66,7 +66,7 @@ class RSS(Plugin):
             }
         )
         if post['image']:
-            embed.set_image(post['image'])
+            embed.set_image(url=post['image'])
 
         return embed
 
