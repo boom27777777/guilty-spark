@@ -231,7 +231,7 @@ class Memes(Plugin):
             if meme in shit_post:
                 steaming_load.append('[in] {:<25}| {}'.format(meme, autism))
 
-        for meme, autism in memes['is'].items():
+        for meme, autism in memes['re'].items():
             try:
                 if re.search(meme, shit_post):
                     steaming_load.append('[re] {:<25}| {}'.format(meme, autism))
