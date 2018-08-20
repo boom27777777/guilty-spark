@@ -16,11 +16,7 @@ from guilty_spark.plugin_system.plugin import Plugin
 from guilty_spark.plugin_system.data import CachedDict
 from guilty_spark.networking import fetch_page
 
-from .simple_rss import get_items
-
-
-def get_posts(feed):
-    return get_items(fetch_page(feed).decode())
+from .simple_rss import get_items, get_title
 
 
 class RSS(Plugin):
@@ -56,7 +52,7 @@ class RSS(Plugin):
         while True:
             await self.update_feeds()
             await asyncio.sleep(60 * 60)  # Poll feeds every hour
-    
+
     def build_message(self, post):
         embed = self.build_embed(
             title=post['title'],
@@ -75,18 +71,43 @@ class RSS(Plugin):
         for channel in channels:
             await self.bot.send_embed(message, channel=channel)
 
+    async def update_feed(self, items, feed):
+        new_posts = []
+        for new in items:
+            if new['link'] == feed['last'] or len(new_posts) > 5:
+                break
+
+            new_posts.append(new)
+
+        for post in new_posts[::-1]:
+            await self.post_feed(feed['channels'], post)
+
+        feed['last'] = new_posts[0]['link']
+        await self.feeds.cache()
+
+    async def do_update(self, link, feed):
+        try:
+            raw_feed = fetch_page(link).decode()
+        except:  # Need to come up with a better Error Strategy
+            raise
+
+        items = get_items(raw_feed)
+
+        if feed.setdefault('title', 'N/A') == 'N/A':
+            feed['title'] = get_title(raw_feed)
+            await self.feeds.cache()
+
+        if not feed['last']:
+            feed['link'] = items[0]['link']
+            await self.feeds.cache()
+
+        if items and items[0]['link'] != feed['last']:
+            await self.update_feed(items, feed)
+
     async def update_feeds(self):
         for link, feed in self.feeds.items():
             if link:
-                try:
-                    recent_post = get_posts(link)[0]
-                except:  # Need to come up with a better Error Strategy
-                    raise
-
-                if recent_post['link'] != feed['last']:
-                    await self.post_feed(feed['channels'], recent_post)
-                    feed['last'] = recent_post['link']
-                    await self.feeds.cache()
+                await self.do_update(link, feed)
 
     async def register_feed(self, chan_id, feed):
         if feed not in self.feeds:
@@ -104,13 +125,22 @@ class RSS(Plugin):
     async def list(self, chan_id):
         embed = self.build_embed(
             title='Registered RSS Feeds',
-            description='\n'.join(self.feeds)
+            description='Feeds registered for #{}'.format(
+                self.bot.current_message.channel.name)
         )
+        for i, f in enumerate(self.feeds.items()):
+            link, feed = f
+            if chan_id in feed['channels']:
+                embed.add_field(
+                    name='{}. {}'.format(i + 1, feed.setdefault('title', 'N/A')),
+                    value=link
+                )
+
         await self.bot.send_embed(embed)
 
     async def on_command(self, command, message: discord.Message):
         subcommand, *args = message.content.replace(command, '').split()
-        
+
         if subcommand == 'register':
             if len(args) != 1:
                 await self.help(command)

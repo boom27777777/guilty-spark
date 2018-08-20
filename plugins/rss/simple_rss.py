@@ -111,3 +111,7 @@ def get_items(raw_feed):
         items.append(parse_item(item))
 
     return items
+
+
+def get_title(raw_feed):
+    return unwrap(get_tags(raw_feed, 'title'))
