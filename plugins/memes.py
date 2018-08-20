@@ -236,7 +236,7 @@ class Memes(Plugin):
                 if re.search(meme, shit_post):
                     steaming_load.append('[re] {:<25}| {}'.format(meme, autism))
             except:
-                self.delete_meme(meme)
+                await self.delete_meme(meme)
 
         steaming_load = '+' + '\n-'.join(steaming_load).replace('```', '')
         await self.bot.code(steaming_load, language='diff')
