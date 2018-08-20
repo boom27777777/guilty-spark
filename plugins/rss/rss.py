@@ -58,13 +58,18 @@ class RSS(Plugin):
             await asyncio.sleep(60 * 60)  # Poll feeds every hour
     
     def build_message(self, post):
-        return self.build_embed(
+        embed = self.build_embed(
             title=post['title'],
+            description=post['date'],
             fields={
                 post['link']: post['description']
             }
         )
-    
+        if post['image']:
+            embed.set_image(post['image'])
+
+        return embed
+
     async def post_feed(self, channels, post):
         message = self.build_message(post)
         for channel in channels:
