@@ -257,7 +257,16 @@ class Monitor(discord.Client):
             try:
                 plugin = self.commands[command]
                 if plugin.enabled:
-                    await plugin.on_command(command, message)
+                    try:
+                        await plugin.on_command(command, message)
+                    except BaseException as e:
+                        logging.error(
+                            'Error in plugin {}.on_command({}, {}):\n {}'.format(
+                                str(plugin),
+                                command,
+                                message.content,
+                                e.msg
+                            ))
             except KeyError:
                 pass
 
