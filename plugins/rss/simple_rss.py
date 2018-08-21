@@ -1,6 +1,5 @@
 """
 :Date: 2018-08-19
-:Version: 0.0.1
 :Author:
     - Jackson McCrea (jacksonmccrea@gmail.com)
 
@@ -76,7 +75,7 @@ def format(raw_tag):
         # Strip extra Whitespace
         tag = re.sub(' +', ' ', tag)
 
-        tag = html.unescape(tag)
+    tag = html.unescape(tag)
 
     return tag
 
@@ -88,20 +87,34 @@ def unwrap(lst):
         return ''
 
 
+def get_image(raw_item):
+    image = ''
+
+    possible_images = [
+        '<media:content.*url=\"([^\"]*)\"',
+        '<img[^>]*src="([^\"]+)"'
+    ]
+
+    for location in possible_images:
+        try:
+            image = re.search(location, raw_item).group(1)
+        except AttributeError:
+            pass
+
+        if image:
+            break
+
+    return image
+
+
 def parse_item(raw_item):
-    item = {
+    return {
         'title': unwrap(get_tags(raw_item, 'title')),
         'link': unwrap(get_tags(raw_item, 'link')),
         'description': unwrap(get_tags(raw_item, 'description')),
         'date': unwrap(get_tags(raw_item, 'pubDate')),
+        'image': get_image(raw_item)
     }
-
-    try:
-        item['image'] = re.search('<media:content.*url=\"([^\"]*)\"', raw_item).group(1)
-    except AttributeError:
-        item['image'] = ''
-
-    return item
 
 
 def get_items(raw_feed):
