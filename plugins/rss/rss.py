@@ -9,6 +9,7 @@ Goal
     Provide an easy to use RSS feed subscription interface
 
 """
+
 import asyncio
 import discord
 
@@ -34,8 +35,14 @@ class RSS(Plugin):
         )
 
         embed.add_field(
-            name='`register [Feed Link]`',
+            name='`subscribe [Feed Link]`',
             value='Adds a new feed to this channel',
+            inline=False
+        )
+
+        embed.add_field(
+            name='`unsubscribe [Feed Link]`',
+            value='Removes a feed from this channel',
             inline=False
         )
 
@@ -74,7 +81,7 @@ class RSS(Plugin):
     async def update_feed(self, items, feed):
         new_posts = []
         for new in items:
-            if new['link'] == feed['last'] or len(new_posts) > 5:
+            if new['link'] == feed['last'] or len(new_posts) >= 5:
                 break
 
             new_posts.append(new)
@@ -109,20 +116,44 @@ class RSS(Plugin):
             if link:
                 await self.do_update(link, feed)
 
-    async def register_feed(self, chan_id, feed):
+    async def register_feed(self, channel, feed):
         if feed not in self.feeds:
             self.feeds[feed] = {
+                'title': 'N/A',
                 'last': '',
-                'channels': [chan_id]
+                'channels': [channel.id]
             }
 
         else:
-            if chan_id not in self.feeds['channels']:
-                self.feeds[feed]['channels'].append(chan_id)
+            if channel.id not in self.feeds['channels']:
+                self.feeds[feed]['channels'].append(channel.id)
 
         await self.feeds.cache()
+        await self.bot.send_embed(self.build_embed(
+            title='Success',
+            description='Feed registered'
+        ))
 
-    async def list(self, chan_id):
+    async def remove_feed(self, channel, feed):
+        if feed in self.feeds:
+            self.feeds[feed]['channels'].remove(channel.id)
+            if not self.feeds[feed]['channels']:
+                del self.feeds[feed]
+
+            await self.feeds.cache()
+            await self.bot.send_embed(self.build_embed(
+                title='Success',
+                description='Unsubscribed from feed <{}>'.format(feed)
+            ))
+
+        else:
+            await self.bot.send_embed(self.build_embed(
+                title='Error',
+                description='Feed (<{}>) not subscribed on this channel'.format(feed),
+                level=2
+            ))
+
+    async def list(self, channel):
         embed = self.build_embed(
             title='Registered RSS Feeds',
             description='Feeds registered for #{}'.format(
@@ -130,7 +161,7 @@ class RSS(Plugin):
         )
         for i, f in enumerate(self.feeds.items()):
             link, feed = f
-            if chan_id in feed['channels']:
+            if channel.id in feed['channels']:
                 embed.add_field(
                     name='{}. {}'.format(i + 1, feed.setdefault('title', 'N/A')),
                     value=link
@@ -141,19 +172,25 @@ class RSS(Plugin):
     async def on_command(self, command, message: discord.Message):
         subcommand, *args = message.content.replace(command, '').split()
 
-        if subcommand == 'register':
+        if subcommand == 'subscribe':
             if len(args) != 1:
                 await self.help(command)
                 return
 
-            await self.register_feed(message.channel.id, args[0])
-            await self.bot.say('Feed Registered')
+            await self.register_feed(message.channel, args[0])
 
         if subcommand == 'list':
             if len(args) != 1:
-                await self.list(message.channel.id)
+                await self.list(message.channel)
             else:
                 await self.list(args[0])
 
-        if str(message.author.id) == self.bot.settings['owner'] and subcommand == 'force-update':
+        if subcommand == 'unsubscribe':
+            if len(args) != 1:
+                await self.help(command)
+
+            await self.remove_feed(message.channel, args[0])
+
+        if int(message.author.id) == self.bot.settings['owner'] and subcommand == 'force-update':
             await self.update_feeds()
+            await self.bot.say('Feeds updated.')
