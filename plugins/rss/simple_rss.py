@@ -99,7 +99,7 @@ def get_image(raw_item):
         try:
             image = re.search(location, raw_item).group(1)
         except AttributeError:
-            pass
+            continue
 
         if image:
             break
