@@ -113,7 +113,7 @@ def parse_item(raw_item):
         'link': unwrap(get_tags(raw_item, 'link')),
         'description': unwrap(get_tags(raw_item, 'description')),
         'date': unwrap(get_tags(raw_item, 'pubDate')),
-        'image': get_image(raw_item)
+        'image': get_image(html.unescape(raw_item))
     }
 
 
