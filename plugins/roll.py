@@ -12,7 +12,7 @@ dyn = Dynamic()
 
 
 @dyn.command()
-def roll(number):
+async def roll(number):
     """Roll the dice!"""
 
     try:

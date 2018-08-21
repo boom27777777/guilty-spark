@@ -1,27 +1,29 @@
 import logging
-import urllib.request as requests
+import aiohttp
 
 
-def fetch_page(url, method='GET', data=None):
+networking_client = aiohttp.ClientSession(
+    headers={
+        'User-Agent': 'GuiltySpark/1.0 (/u/CheetElwin)'
+    }
+)
+
+
+async def get(url):
     """ Builds a request as the bot to request anything through HTTP
 
     :param url:
         The url to fetch
-    :param method:
-        Http method to use
-    :param data:
-        Data for POST
     :return:
-        Response content in bytes or None if an error occurs
+        Response content in bytes or '' if an error occurs
     """
-    content = None
-    try:
-        request = requests.Request(url, method=method, data=data)
 
-        opener = requests.build_opener()
-        request.add_header(
-            'User-Agent', 'GuiltySpark/1.0 (/u/CheetElwin)')
-        content = opener.open(request).read()
-    except requests.HTTPError:
+    global networking_client  # Use the Bot network instance
+
+    try:
+        async with networking_client.get(url) as resp:
+            content = await resp.text()
+            return content
+    except aiohttp.ClientConnectionError:
         logging.error('Failed to fetch page %s', url)
-    return content
+        return ''

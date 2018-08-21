@@ -15,7 +15,7 @@ import discord
 
 from guilty_spark.plugin_system.plugin import Plugin
 from guilty_spark.plugin_system.data import CachedDict
-from guilty_spark.networking import fetch_page
+from guilty_spark.networking import get
 
 from .simple_rss import get_items, get_title
 
@@ -94,7 +94,7 @@ class RSS(Plugin):
 
     async def do_update(self, link, feed):
         try:
-            raw_feed = fetch_page(link).decode()
+            raw_feed = await get(link)
         except:  # Need to come up with a better Error Strategy
             raise
 

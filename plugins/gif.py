@@ -9,7 +9,7 @@ import json
 from random import randint
 from urllib.parse import urlencode
 
-from guilty_spark.networking import fetch_page
+from guilty_spark.networking import get
 from guilty_spark.plugin_system.dynamic import Dynamic
 
 usage = 'Usage: !gif [search]'
@@ -18,15 +18,15 @@ dyn = Dynamic()
 
 
 @dyn.command(glob=True)
-def gif(*search):
+async def gif(*search):
     """Grabs a random gif for a given search term"""
 
     url = 'http://api.giphy.com/v1/gifs/search?' + \
           urlencode([('q', '+'.join(search))]) + \
           '&api_key=dc6zaTOxFJmzC'
 
-    blob = fetch_page(url)
-    data = json.loads(blob.decode())
+    blob = await get(url)
+    data = json.loads(blob)
     gifs = data['data']
 
     if len(gifs) > 0:
