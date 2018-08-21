@@ -3,6 +3,7 @@
 :Author:
     - Jackson McCrea (jacksonmccrea@gmail.com)
 """
+import asyncio
 import discord
 from collections import OrderedDict
 from guilty_spark.plugin_system.plugin import Plugin
@@ -85,7 +86,7 @@ class Dynamic:
                 command = self._strip_prefix(command)
                 func, *_ = cmds[command]
                 try:
-                    result = func(message)
+                    result = await func(message)
 
                     if type(result) is str:
                         await self.bot.say(result)
@@ -109,15 +110,15 @@ class Dynamic:
         for cmd, vals in self.commands.items():
             params, usage, hlp, func, flags = vals.values()
 
-            def _func(msg):
+            async def _func(msg):
                 _, *args = msg.content.rstrip().split()
                 is_globed = flags['glob'] and len(args) > 0
 
                 if flags['context']:
-                    return func(msg)
+                    return await func(msg)
 
                 elif len(args) == len(params) or is_globed:
-                    return func(*args)
+                    return await func(*args)
 
                 else:
                     raise DynamicError(usage)
