@@ -165,7 +165,8 @@ class RSS(Plugin):
                 num_feeds += 1
                 embed.add_field(
                     name='{}. {}'.format(num_feeds, feed.setdefault('title', 'N/A')),
-                    value=link
+                    value=link,
+                    inline=False
                 )
 
         await self.bot.send_embed(embed)
