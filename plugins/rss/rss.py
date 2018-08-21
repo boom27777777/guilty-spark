@@ -159,11 +159,12 @@ class RSS(Plugin):
             description='Feeds registered for #{}'.format(
                 self.bot.current_message.channel.name)
         )
-        for i, f in enumerate(self.feeds.items()):
-            link, feed = f
+        num_feeds = 0
+        for link, feed in self.feeds.items():
             if channel.id in feed['channels']:
+                num_feeds += 1
                 embed.add_field(
-                    name='{}. {}'.format(i + 1, feed.setdefault('title', 'N/A')),
+                    name='{}. {}'.format(num_feeds, feed.setdefault('title', 'N/A')),
                     value=link
                 )
 
