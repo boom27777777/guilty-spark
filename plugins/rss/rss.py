@@ -125,7 +125,7 @@ class RSS(Plugin):
             }
 
         else:
-            if channel.id not in self.feeds['channels']:
+            if channel.id not in self.feeds[feed]['channels']:
                 self.feeds[feed]['channels'].append(channel.id)
 
         await self.feeds.cache()
