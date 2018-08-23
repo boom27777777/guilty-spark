@@ -58,12 +58,10 @@ class RSS(Plugin):
         await self.feeds.load()
 
         while True:
-            logging.info('Updating RSS Feeds')
             try:
                 await self.update_feeds()
             except BaseException as e:
                 logging.error(str(e))
-
             await asyncio.sleep(60 * 60)  # Poll feeds every hour
 
     def build_message(self, post):
@@ -118,9 +116,12 @@ class RSS(Plugin):
             await self.update_feed(items, feed)
 
     async def update_feeds(self):
+        logging.info('Updating RSS Feeds')
         for link, feed in self.feeds.items():
             if link:
                 await self.do_update(link, feed)
+
+        logging.info('RSS Update finished')
 
     async def register_feed(self, channel, feed):
         if feed not in self.feeds:
