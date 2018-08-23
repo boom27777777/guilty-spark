@@ -12,6 +12,7 @@ Goal
 
 import asyncio
 import discord
+import logging
 
 from guilty_spark.plugin_system.plugin import Plugin
 from guilty_spark.plugin_system.data import CachedDict
@@ -57,7 +58,12 @@ class RSS(Plugin):
         await self.feeds.load()
 
         while True:
-            await self.update_feeds()
+            logging.info('Updating RSS Feeds')
+            try:
+                await self.update_feeds()
+            except BaseException as e:
+                logging.error(str(e))
+
             await asyncio.sleep(60 * 60)  # Poll feeds every hour
 
     def build_message(self, post):
