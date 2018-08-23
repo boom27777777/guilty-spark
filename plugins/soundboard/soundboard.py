@@ -67,6 +67,8 @@ class SoundBoard(Plugin):
 
         real_path = os.path.join(SOUND_PATH, name)
         if os.path.exists(real_path):
+            command = 'ffmpeg-normalize {path} -o {path} -f'.format(path=real_path)
+            os.system(command)
             await self.bot.play_sound(real_path)
         else:
             await self.bot.send_embed(self.build_embed(
