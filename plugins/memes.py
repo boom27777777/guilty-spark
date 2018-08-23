@@ -330,5 +330,10 @@ class Memes(Plugin):
                     'user': message.author
                 })
 
+            elif dank.startswith('<sound>'):
+                await self.bot.plugin_message(**{
+                    'soundboard-message': dank.replace('<sound>', ''),
+                })
+
             else:
                 await self.bot.say(dank)
