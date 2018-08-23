@@ -4,7 +4,6 @@
 :Author:
     - Jackson McCrea (jacksonmccrea@gmail.com)
 """
-import asyncio
 import discord
 
 from guilty_spark.bot import Monitor
@@ -24,8 +23,11 @@ class PluginAdmin(Plugin):
 
     async def enable_plugin(self, name: str, message: discord.Message):
         handler = await self._get_plugins(name)
-        if handler and not handler.enabled:
-            handler.enable(message.channel.id)
+        if handler and not handler.enabled or handler.use_whitelist:
+            if handler.use_whitelist:
+                handler.disable(message.channel.id)
+            else:
+                handler.enable(message.channel.id)
             await handler.cache()
 
             await self.bot.say('Plugin {} enabled'.format(name))
@@ -34,8 +36,11 @@ class PluginAdmin(Plugin):
 
     async def disable_plugin(self, name: str, message: discord.Message):
         handler = await self._get_plugins(name)
-        if handler.enabled:
-            handler.disable(message.channel.id)
+        if handler.enabled or handler.use_whitelist:
+            if handler.use_whitelist:
+                handler.enable(message.channel.id)
+            else:
+                handler.disable(message.channel.id)
             await handler.cache()
 
             await self.bot.say('Disabled {} for channel {}'.format(
@@ -61,8 +66,11 @@ class PluginAdmin(Plugin):
         if sub_command == 'list':
             p_list = []
             for name, handle in self.bot.plugins.items():
-                p_list.append('{:<20}|{}'.format(
-                    name, 'Enabled' if handle.enabled else 'Disabled'))
+                p_list.append('{:<20}{:<10}{}'.format(
+                    name,
+                    'Enabled' if handle.enabled else 'Disabled',
+                    'Whitelisted' if handle.use_whitelist else ''
+                ))
             await self.bot.code('\n'.join(p_list))
 
         if sub_command == 'disable':

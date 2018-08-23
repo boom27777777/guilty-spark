@@ -57,6 +57,9 @@ class Help(Plugin):
         )
 
         for name, plugin in self._plugins:
+            if not plugin.enabled:
+                continue
+
             plugin_body = '```css\n'
 
             for command in plugin.commands:
