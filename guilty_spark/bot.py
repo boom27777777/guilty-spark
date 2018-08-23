@@ -256,19 +256,20 @@ class Monitor(discord.Client):
             command, *_ = message.content.split()
             try:
                 plugin = self.commands[command]
-                if plugin.enabled:
-                    try:
-                        await plugin.on_command(command, message)
-                    except BaseException as e:
-                        logging.error(
-                            'Error in plugin {}.on_command({}, {}):\n {}'.format(
-                                str(plugin),
-                                command,
-                                message.content,
-                                e.msg
-                            ))
             except KeyError:
-                pass
+                return
+
+            if plugin.enabled:
+                try:
+                    await plugin.on_command(command, message)
+                except BaseException as e:
+                    logging.error(
+                        'Error in plugin {}.on_command({}, {}):\n {}'.format(
+                            str(plugin),
+                            command,
+                            message.content,
+                            str(e)
+                        ))
 
             return
 
