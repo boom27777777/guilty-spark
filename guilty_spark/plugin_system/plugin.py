@@ -35,6 +35,7 @@ class Plugin:
 
         self._cache = CachedDict(self.name)
         self.disabled_channels = []
+        self.use_whitelist = False
 
     async def on_load(self):
         data = await self._cache.load()
@@ -57,7 +58,9 @@ class Plugin:
     def enabled(self):
         if self.bot.current_message:
             chan_id = self.bot.current_message.channel.id
-            if chan_id not in self.disabled_channels:
+            if not self.use_whitelist and chan_id not in self.disabled_channels:
+                return True
+            elif self.use_whitelist and chan_id in self.disabled_channels:
                 return True
         return False
 

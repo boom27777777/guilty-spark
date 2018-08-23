@@ -21,6 +21,7 @@ class SoundBoard(Plugin):
         super().__init__(name, bot, commands=['soundboard'])
         self.sounds = {}
         self.build_cache()
+        self.use_whitelist = True
 
     async def help(self, command: str):
         embed = self.build_embed(
