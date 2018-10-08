@@ -250,6 +250,13 @@ class Monitor(discord.Client):
         """
 
         logging.info('Connected as %s(%s)', self.user.name, self.user.id)
+        presence = discord.Game(
+            name='{}help to get started'.format(self.prefix),
+            url='https://github.com/cheetelwin/guilty-spark'
+        )
+
+        await self.change_presence(game=presence)
+
         await self.call_hooks('on_ready')
 
     async def on_message(self, message: discord.Message):
