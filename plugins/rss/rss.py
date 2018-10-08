@@ -64,37 +64,38 @@ class RSS(Plugin):
                 logging.error(str(e))
             await asyncio.sleep(60 * 60)  # Poll feeds every hour
 
-    def build_message(self, post):
-        embed = self.build_embed(
-            title=post['title'],
-            description=post['date'],
-            fields={
-                post['link']: post['description']
-            }
+    def build_message(self, feed_title, post):
+        message = "{}: {}\n\n{}".format(
+            feed_title,
+            post['title'],
+            post['link']
         )
-        if post['image']:
-            embed.set_image(url=post['image'])
 
-        return embed
+        return message
 
-    async def post_feed(self, channels, post):
-        message = self.build_message(post)
-        for channel in channels:
-            await self.bot.send_embed(message, channel=channel)
+    async def post_feed(self, channels, feed_title, post):
+        message = self.build_message(feed_title, post)
+        for chan_id in channels:
+            channel = self.bot.get_channel(chan_id)
+            await self.bot.send_message(channel, message)
 
     async def update_feed(self, items, feed):
         new_posts = []
+        first_update = bool(not feed['last'])
         for new in items:
             if new['link'] == feed['last'] or len(new_posts) >= 5:
                 break
 
             new_posts.append(new)
 
-        for post in new_posts[::-1]:
-            await self.post_feed(feed['channels'], post)
-
         feed['last'] = new_posts[0]['link']
         await self.feeds.cache()
+
+        if first_update:
+            return
+
+        for post in new_posts[::-1]:
+            await self.post_feed(feed['channels'], feed['title'], post)
 
     async def do_update(self, link, feed):
         try:
@@ -178,6 +179,11 @@ class RSS(Plugin):
 
         await self.bot.send_embed(embed)
 
+    async def on_channel_delete(self, channel: discord.Channel):
+        for _, feed in self.feeds.items():
+            if channel.id in feed['channels']:
+                feed['channels'].remove(channel.id)
+
     async def on_command(self, command, message: discord.Message):
         subcommand, *args = message.content.replace(command, '').split()
 
@@ -200,6 +206,6 @@ class RSS(Plugin):
 
             await self.remove_feed(message.channel, args[0])
 
-        if int(message.author.id) == self.bot.settings['owner'] and subcommand == 'force-update':
+        if int(message.author.id) == int(self.bot.settings['owner']) and subcommand == 'force-update':
             await self.update_feeds()
             await self.bot.say('Feeds updated.')
