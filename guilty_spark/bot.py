@@ -199,6 +199,36 @@ class Monitor(discord.Client):
         if voice_chan.id in self.sounds:
             self.sounds[voice_chan.id].volume = volume
 
+    def get_user_by_id(self, user_id):
+        for member in self.get_all_members():
+            if member.id == user_id:
+                return member
+
+    async def log_plugin_error(self, plugin, command, message, error):
+        report = 'Error in plugin {}.on_command({}, {}):\n {}'.format(
+            str(plugin),
+            command,
+            message.content,
+            str(error)
+        )
+
+        logging.error(report)
+
+        owner = self.get_user_by_id(self.settings['owner'])
+
+        server = 'PM'
+        if message.server:
+            server = message.server.name
+
+        report += '\n\nMessage:\n**{}:{}:{}**\n```{}```'.format(
+            server,
+            message.channel.name,
+            message.author.name,
+            message.content
+        )
+
+        await self.send_message(owner, report)
+
     async def call_hooks(self, dep: str, *args, **kwargs):
         """ |coro|
 
@@ -263,13 +293,7 @@ class Monitor(discord.Client):
                 try:
                     await plugin.on_command(command, message)
                 except BaseException as e:
-                    logging.error(
-                        'Error in plugin {}.on_command({}, {}):\n {}'.format(
-                            str(plugin),
-                            command,
-                            message.content,
-                            str(e)
-                        ))
+                    await self.log_plugin_error(plugin, command, message, e)
 
             return
 
