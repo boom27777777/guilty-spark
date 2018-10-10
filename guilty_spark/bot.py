@@ -6,6 +6,7 @@ import logging
 import guilty_spark.config as config
 from guilty_spark.util import slice_message, cap_message
 from guilty_spark.plugin_system.manager import PluginManager
+from guilty_spark.plugin_system.plugin import Plugin
 
 
 class Monitor(discord.Client):
@@ -204,11 +205,19 @@ class Monitor(discord.Client):
             if member.id == user_id:
                 return member
 
-    async def log_plugin_error(self, plugin, command, message, error):
-        report = 'Error in plugin {}.on_command({}, {}):\n {}'.format(
+    async def log_plugin_error(self, plugin, error, hook, *args):
+        # Decode arguments
+        arg_str = []
+        for arg in args:
+            if hasattr(arg, 'content'):
+                arg_str.append('<Message: "{}">'.format(arg.content))
+            else:
+                arg_str.append(str(arg))
+
+        report = 'Error in plugin {}.{}({}):\n {}'.format(
             str(plugin),
-            command,
-            message.content,
+            str(hook),
+            ', '.join(arg_str),
             str(error)
         )
 
@@ -216,18 +225,46 @@ class Monitor(discord.Client):
 
         owner = self.get_user_by_id(self.settings['owner'])
 
-        server = 'PM'
-        if message.server:
-            server = message.server.name
-
-        report += '\n\nMessage:\n**{}:{}:{}**\n```{}```'.format(
-            server,
-            message.channel.name,
-            message.author.name,
-            message.content
-        )
-
         await self.send_message(owner, report)
+
+    async def parse_command(self, message):
+        """ |coro|
+
+            Test our available commands for a matching signature and pass the
+            message onto the appropriate plugin on_command hook
+            :param message:
+                Discord message object to parse
+        """
+
+        command, *_ = message.content.split()
+        try:
+            plugin = self.commands[command]
+        except KeyError:
+            return
+
+        if not plugin.enabled:
+            return
+
+        if not Plugin.has_permissions(message.author, plugin.on_command):
+            await self.send_embed(Plugin.build_embed(
+                title="Error",
+                description="You don't have permission to access that system",
+                level=2
+            ))
+            return
+
+        try:
+            await plugin.on_command(command, message)
+        except BaseException as e:
+            await self.log_plugin_error(
+                plugin,
+                e,
+                'on_command',
+                command,
+                message
+            )
+
+        return
 
     async def call_hooks(self, dep: str, *args, **kwargs):
         """ |coro|
@@ -240,7 +277,11 @@ class Monitor(discord.Client):
         """
         for plugin in self.callbacks.setdefault(dep, []):
             if plugin.enabled or dep == 'on_ready':
-                await getattr(plugin, dep)(*args, **kwargs)
+                func = getattr(plugin, dep)
+                try:
+                    await func(*args, **kwargs)
+                except BaseException as e:
+                    await self.log_plugin_error(plugin, e, dep, *args)
 
     async def on_ready(self):
         """ |coro|
@@ -287,21 +328,7 @@ class Monitor(discord.Client):
 
         # Parse the message for our command character
         if message.content.startswith(self.prefix):
-
-            # Test our available commands for a matching signature and pass
-            # the message onto the appropriate plugin on_command hook
-            command, *_ = message.content.split()
-            try:
-                plugin = self.commands[command]
-            except KeyError:
-                return
-
-            if plugin.enabled:
-                try:
-                    await plugin.on_command(command, message)
-                except BaseException as e:
-                    await self.log_plugin_error(plugin, command, message, e)
-
+            await self.parse_command(message)
             return
 
         # Run all on_message hooks
