@@ -30,7 +30,7 @@ class THICCRole(Plugin):
             return
 
         name = 'THICC#{}'.format(args[0])
-        user = re.search('[0-9]+', args[1]).group(1)
+        user = re.findall('\d+', args[1])[0]
 
         try:
             role = await self.bot.create_role(
