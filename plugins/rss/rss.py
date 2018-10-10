@@ -65,7 +65,7 @@ class RSS(Plugin):
             await asyncio.sleep(60 * 60)  # Poll feeds every hour
 
     def build_message(self, feed_title, post):
-        message = "{}: {}\n\n{}".format(
+        message = "**{}** | {}\n\n{}".format(
             feed_title,
             post['title'],
             post['link']
