@@ -1,4 +1,5 @@
 import discord
+import re
 
 from guilty_spark.plugin_system.plugin import Plugin
 
@@ -29,7 +30,7 @@ class THICCRole(Plugin):
             return
 
         name = 'THICC#{}'.format(args[0])
-        user = args[1].replace('<', '').replace('@', '').replace('>', '')
+        user = re.search('[0-9]+', args[1]).group(1)
 
         try:
             role = await self.bot.create_role(
