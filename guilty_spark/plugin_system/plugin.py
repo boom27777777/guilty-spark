@@ -109,11 +109,15 @@ class Plugin:
 
     @staticmethod
     def has_permissions(user: discord.User, hook):
-        if hasattr(hook, 'perm_admin'):
+        if not hasattr(user, 'server_permissions'):
+            return True
+
+        elif hasattr(hook, 'perm_admin'):
             if user.server_permissions.administrator:
                 return True
             else:
                 return False
+
         else:
             return True
 
