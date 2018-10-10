@@ -14,6 +14,34 @@ class PluginAdmin(Plugin):
     def __init__(self, name, bot: Monitor):
         super().__init__(name, bot, commands=['plugin'])
 
+    async def help(self, command: str):
+        embed = self.build_embed(
+            title='Plugin Administration',
+            description='Disable and enable plugins\n\n'
+                        '**Usage**: `{}plugin [subcommand]`\n\n'
+                        '**Subcommands**:'.format(self.bot.prefix)
+        )
+
+        embed.add_field(
+            name='`list`',
+            value='Shows the current state of plugins for this channel',
+            inline=False
+        )
+
+        embed.add_field(
+            name='`enable [plugin_name]`',
+            value='Enables the plugin for this channel',
+            inline=False
+        )
+
+        embed.add_field(
+            name='`disable [plugin_name]`',
+            value='Disables a plugin for this channel',
+            inline=False
+        )
+
+        await self.bot.send_embed(embed)
+
     async def _get_plugins(self, name):
         try:
             return self.bot.plugins[name]
@@ -49,6 +77,7 @@ class PluginAdmin(Plugin):
         else:
             await self.bot.say('Plugin {} already disabled'.format(name))
 
+    @Plugin.admin
     async def on_command(self, command, message: discord.Message):
         args = message.content.split()
 
@@ -56,12 +85,6 @@ class PluginAdmin(Plugin):
             sub_command = 'list'
         else:
             _, sub_command, *args = args
-
-        if int(message.author.id) != self.bot.settings['owner']:
-            await self.bot.say('Sorry, only {} can do that'.format(
-                '<@{}>'.format(self.bot.settings['owner'])
-            ))
-            return
 
         if sub_command == 'list':
             p_list = []
