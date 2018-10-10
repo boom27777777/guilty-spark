@@ -17,5 +17,5 @@ You can install redis from [here](https://redis.io/download)
 
 Then run in the project root.
 
-`pip install requirements.txt`
+`pip install -r requirements.txt`
 
