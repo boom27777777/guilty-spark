@@ -111,12 +111,12 @@ class RSS(Plugin):
 
         try:
 
-        if not feed['last']:
-            feed['link'] = items[0]['link']
-            await self.feeds.cache()
+            if not feed['last']:
+                feed['link'] = items[0]['link']
+                await self.feeds.cache()
 
-        if items and items[0]['link'] != feed['last']:
-            await self.update_feed(items, feed)
+            if items and items[0]['link'] != feed['last']:
+                await self.update_feed(items, feed)
 
         except IndexError:
             logging.info("Failed to fetch feed {}".format(link))
