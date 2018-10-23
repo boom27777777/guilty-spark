@@ -205,12 +205,14 @@ class Memes(Plugin):
                 if meme in message:
                     dank = autism
                     maymay = meme
+                    break
 
             for meme, autism in memes['re'].items():
                 try:
                     if re.search(meme, message):
                         dank = autism
                         maymay = meme
+                        break
                 except:
                     self.delete_meme(meme)
         return dank, maymay
