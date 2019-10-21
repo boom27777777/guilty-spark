@@ -27,3 +27,15 @@ async def get(url):
     except aiohttp.ClientConnectionError:
         logging.error('Failed to fetch page %s', url)
         return ''
+
+
+async def post(url, data):
+    global networking_client
+
+    try:
+        async with networking_client.post(url, data=data) as resp:
+            content = await resp.text()
+            return content
+    except aiohttp.ClientConnectionError:
+        logging.error('Failed to fetch page %s', url)
+        return ''
