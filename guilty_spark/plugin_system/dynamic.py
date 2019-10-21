@@ -94,6 +94,14 @@ class Dynamic:
                     elif type(result) is dict:
                         await self.bot.send_embed(self.build_embed(**result))
 
+                    elif hasattr(result, 'read'):
+                        name = 'file'
+
+                        if hasattr(result, 'file_name'):
+                            name = result.file_name
+
+                        await self.bot.send_file(message.channel, result, filename=name)
+
                 except DynamicError as e:
                     await self.bot.send_embed(
                         self.build_embed(

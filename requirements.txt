@@ -3,7 +3,6 @@ aioredis==1.0.0
 async-timeout==2.0.0
 chardet==3.0.4
 cycler==0.10.0
-discord==0.0.2
 discord.py==0.16.12
 hiredis==0.2.0
 matplotlib==2.1.2
