@@ -14,7 +14,7 @@ class PluginAdmin(Plugin):
     def __init__(self, name, bot: Monitor):
         super().__init__(name, bot, commands=['plugin'])
 
-    async def help(self, command: str):
+    async def help(self, command: str, message):
         embed = self.build_embed(
             title='Plugin Administration',
             description='Disable and enable plugins\n\n'

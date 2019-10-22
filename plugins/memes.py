@@ -87,7 +87,7 @@ class Memes(Plugin):
 
         await self.cache_memes()
 
-    async def help(self, _):
+    async def help(self, command, message):
         await self.bot.code(
             '\n'.join([
                 '-Retune the dank emitters to recognize new memes\n',

@@ -230,7 +230,7 @@ class Plugin:
         """ Internal plugin message passing """
         pass
 
-    async def help(self, command: str):
+    async def help(self, command: str, message):
         await self.bot.say("Help hasn't been added for this command yet")
 
     def __repr__(self):

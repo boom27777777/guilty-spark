@@ -12,7 +12,7 @@ class Sound(Plugin):
     def __init__(self, name: str, bot):
         super().__init__(name, bot, commands=['sound'])
 
-    async def help(self, msg):
+    async def help(self, command, message):
         embed = self.build_embed(
             title='Sound manager',
             description='Manages outing sounds\n\n'
@@ -44,7 +44,7 @@ class Sound(Plugin):
         _, *args = message.content.split()
 
         if len(args) == 0:
-            await self.help(message)
+            await self.help(message, None)
 
         elif args[0] == 'stop':
             await self.bot.stop_sound()

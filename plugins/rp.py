@@ -39,7 +39,7 @@ class RP(Plugin):
         with plugin_file(channel.id + '.txt', mode='rb') as log:
             await self.bot.send_file(channel, log, )
 
-    async def help(self, _):
+    async def help(self, command, message):
         await self.bot.code(
             'A simple helper for Role playing\n'
             '    record - Start recording a log for a session\n'

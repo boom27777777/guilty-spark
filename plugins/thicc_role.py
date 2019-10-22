@@ -10,7 +10,7 @@ class THICCRole(Plugin):
 
         self.use_whitelist = True
 
-    async def help(self, _):
+    async def help(self, command, message):
         embed = self.build_embed(
             title='THICC Group management',
             description='Auto \n\n'
@@ -26,7 +26,7 @@ class THICCRole(Plugin):
             if len(args) < 2:
                 raise IndexError
         except IndexError:
-            await self.help(command)
+            await self.help(command, None)
             return
 
         name = 'THICC#{}'.format(args[0])

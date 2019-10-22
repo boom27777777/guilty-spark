@@ -17,7 +17,7 @@ class Thanos(Plugin):
 
         self.list = CachedDict('thanosdidnothingwrong')
 
-    async def help(self, _):
+    async def help(self, command, message):
         embed = self.build_embed(
             title='Face Thanos\' judgement',
             description='Sub commands:\n'
