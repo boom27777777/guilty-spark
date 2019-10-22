@@ -45,23 +45,18 @@ class Waifu(Plugin):
 
         return json.loads(blob)
 
-    async def get_seeds(self):
-        data = await self.api_request(api_generate_endpoint, {'step': 0})
-
-        return data.get('newGirls')[0]['seeds']
-
     async def generate_seeds(self, seed=1000000):
-        return [seed for _ in range(17)] + [[random.randint(1000,2000) / 10 for _ in range(3)]]
+        return [seed for _ in range(17)] + [[0 for _ in range(3)]]
 
     async def get_waifu(self, seed=None):
         if seed:
-            seed = await self.generate_seeds(seed)
+            payload = {'currentGirl': await self.generate_seeds(seed), 'step': 3}
         else:
-            seed = await self.get_seeds()
+            payload = {'step': 0}
 
-        data = await self.api_request(api_big_endpoint, {'currentGirl': seed})
+        data = await self.api_request(api_generate_endpoint, payload)
 
-        girl = data.get('girl')
+        girl = data.get('newGirls')[0].get('image')
 
         return BytesIO(b64decode(girl))
 
