@@ -33,7 +33,7 @@ async def get_waifu():
 
 @dyn.command()
 async def waifu():
-    """Generates a Waifu with https://waifulabs.com"""
+    """Generates a Waifu using the weeb AI at https://waifulabs.com"""
 
     image = await get_waifu()
     setattr(image, 'file_name', 'waifu.png')

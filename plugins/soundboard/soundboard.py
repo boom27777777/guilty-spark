@@ -24,7 +24,7 @@ class SoundBoard(Plugin):
         self.build_cache()
         self.use_whitelist = True
 
-    async def help(self, command: str):
+    async def help(self, command: str, message):
         embed = self.build_embed(
             title='Discord Soundboard',
             description='Play some sounds from my memory banks\n\n'
@@ -109,7 +109,7 @@ class SoundBoard(Plugin):
             ))
 
         else:
-            await self.help(command)
+            await self.help(command, None)
 
     async def on_plugin_message(self, *args, **kwargs):
         sound = kwargs.setdefault('soundboard-message', '')

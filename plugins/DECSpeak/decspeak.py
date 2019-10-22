@@ -11,12 +11,13 @@ class DECSpeak(Plugin):
     def __init__(self, name: str, bot):
         super().__init__(name, bot, commands=['speak'])
 
-    async def help(self, message):
+    async def help(self, command, message):
         args = message.content.split()
         if len(args) == 2:
             embed = self.build_embed(
                 title='Speak',
-                description='make the bot join your channel and say something'
+                description='make the bot join your channel and say something. You can use '
+                f'`{self.bot.prefix}help speak [voice|phonemes]` for more information'
             )
             embed.add_field(
                 name='Voices:',
@@ -48,7 +49,7 @@ class DECSpeak(Plugin):
             if args[2].startswith('phoneme'):
                 embed = self.build_embed(
                     title='Speak/Phonemes',
-                    description='These are all the valid phonemes```'
+                    description='These are all the valid phonemes'
                 )
                 embed.add_field(
                     name="Usage",

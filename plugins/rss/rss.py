@@ -27,7 +27,7 @@ class RSS(Plugin):
         super().__init__(name, bot, commands=['rss'])
         self.feeds = CachedDict('rss-feeds')
 
-    async def help(self, command: str):
+    async def help(self, command: str, message):
         embed = self.build_embed(
             title='RSS Feeds',
             description='Tracks RSS feeds, and gives you updates\n\n'
@@ -194,7 +194,7 @@ class RSS(Plugin):
 
         if subcommand == 'subscribe':
             if len(args) != 1:
-                await self.help(command)
+                await self.help(command, None)
                 return
 
             await self.register_feed(message.channel, args[0])
@@ -207,7 +207,7 @@ class RSS(Plugin):
 
         if subcommand == 'unsubscribe':
             if len(args) != 1:
-                await self.help(command)
+                await self.help(command, None)
 
             await self.remove_feed(message.channel, args[0])
 

@@ -71,7 +71,7 @@ class Dynamic:
             def _prefix(self, string):
                 return string.format(self.bot.prefix)
 
-            async def help(self, command):
+            async def help(self, command, message):
                 command = self._strip_prefix(command)
                 _, hlp = cmds[command]
 

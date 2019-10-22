@@ -44,7 +44,7 @@ class SlothStats(Plugin):
         self.bonus = CachedDict('slothbonus')
         self.rates = CachedDict('slothrates')
 
-    async def help(self, command: str):
+    async def help(self, command: str, message):
         embed = self.build_embed(
             title='Stats for Sloths',
             description='A simple utility to help visualize sloth brutality.\n'

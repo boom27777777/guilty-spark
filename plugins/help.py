@@ -13,7 +13,7 @@ class Help(Plugin):
         self._longest = 0
         self._padding = ''
 
-    async def help(self, _):
+    async def help(self, command, message):
         embed = self.build_embed(
             title='Halep friend',
             description='Gives you helps\n' + usage
@@ -84,7 +84,7 @@ class Help(Plugin):
             command = self.bot.prefix + command
 
         if command in self.bot.commands:
-            await self.bot.commands[command].help(message)
+            await self.bot.commands[command].help(command, message)
         else:
             await self.bot.say(
                 'I\'m not familiar with that command, curious')
