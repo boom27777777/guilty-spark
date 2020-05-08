@@ -9,7 +9,12 @@ networking_client = aiohttp.ClientSession(
 )
 
 
-async def get(url):
+async def get(url, encoding=None):
+    resp = await get_bytes(url)
+    return resp.decode(encoding)
+
+
+async def get_bytes(url):
     """ Builds a request as the bot to request anything through HTTP
 
     :param url:
@@ -22,7 +27,7 @@ async def get(url):
 
     try:
         async with networking_client.get(url) as resp:
-            content = await resp.text()
+            content = await resp.read()
             return content
     except aiohttp.ClientConnectionError:
         logging.error('Failed to fetch page %s', url)
