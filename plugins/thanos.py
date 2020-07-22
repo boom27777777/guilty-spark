@@ -1,7 +1,7 @@
 """
 :Date: 2018-07-06
 :Author:
-    - Jackson McCrea (jacksonmccrea@gmail.com)
+    - Boom (boom@mouse.fail)
 """
 import discord
 

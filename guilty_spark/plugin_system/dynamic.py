@@ -1,7 +1,7 @@
 """
 :Date: 2016-08-13
 :Author:
-    - Jackson McCrea (jacksonmccrea@gmail.com)
+    - Boom (boom@mouse.fail)
 """
 import asyncio
 import discord

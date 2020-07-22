@@ -2,7 +2,7 @@
 :Date: 2019-10-20
 :Version: 0.0.1
 :Author:
-    - Jackson McCrea (jacksonmccrea@gmail.com)
+    - Boom (boom@mouse.fail)
 """
 
 import discord

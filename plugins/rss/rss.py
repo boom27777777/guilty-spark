@@ -2,7 +2,7 @@
 :Date: 2018-08-19
 :Version: 0.0.1
 :Author:
-    - Jackson McCrea (jacksonmccrea@gmail.com)
+    - Boom (boom@mouse.fail)
 
 Goal
 ----
