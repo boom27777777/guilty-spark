@@ -128,8 +128,8 @@ class DECSpeak(Plugin):
         command = 'wine ./plugins/DECSpeak/say.exe -pre "[:phoneme on]" -w "' + soundpath + '" <' + inputpath
         print(command)
         os.system(command)
-        command = 'ffmpeg-normalize {path} -o {path} -f'.format(path=soundpath)
-        os.system(command)
+#        command = 'ffmpeg-normalize {path} -o {path} -f -nt rms -t -15'.format(path=soundpath)
+#        os.system(command)
         await self.bot.play_sound(soundpath)
         # soundpath = plugin_file(soundpath, 'r')
         # await self.bot.send_file(channel, soundpath)

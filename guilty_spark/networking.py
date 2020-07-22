@@ -9,9 +9,9 @@ networking_client = aiohttp.ClientSession(
 )
 
 
-async def get(url, encoding=None):
+async def get(url):
     resp = await get_bytes(url)
-    return resp.decode(encoding)
+    return resp.decode()
 
 
 async def get_bytes(url):
