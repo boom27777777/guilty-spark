@@ -184,8 +184,8 @@ class Memes(Plugin):
         return autism
 
     def set_server_id(self, message: discord.Message):
-        if message.server:
-            self.server_id = message.server.id
+        if message.guild:
+            self.server_id = message.guild.id
         else:
             self.server_id = message.channel.id
 

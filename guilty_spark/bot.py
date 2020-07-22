@@ -2,6 +2,7 @@ import asyncio
 import datetime
 import discord
 import logging
+import traceback
 
 import guilty_spark.config as config
 from guilty_spark.util import slice_message, cap_message
@@ -12,7 +13,7 @@ from guilty_spark.plugin_system.plugin import Plugin
 class Monitor(discord.Client):
     """The main subclass of the Discord client"""
 
-    def __init__(self, settings_file: str = '', **options):
+    def __init__(self, settings_file, **options):
         """ Sets up our bot
 
         :param settings_file:
@@ -93,18 +94,18 @@ class Monitor(discord.Client):
                 limit, content, ends)
 
             for part in parts:
-                await super().send_message(
-                    destination, part, *args, tts=tts)
+                await destination.send(
+                    part, *args, tts=tts)
 
         else:
             if isinstance(ends, list):
                 content = cap_message(content, ends[0], ends[1])
             else:
                 content = cap_message(content, ends, ends)
-            await super().send_message(
-                destination, content, *args, tts=tts)
+            await destination.send(
+                content, *args, tts=tts)
 
-    async def say(self, message: str, ends=None):
+    async def say(self, message, ends=None):
         """ Return a context dependant message
 
             Checks the bot's current message property and sends a message back
@@ -120,17 +121,20 @@ class Monitor(discord.Client):
             await self.send_message(
                 self.current_message.channel, message, ends=ends)
 
-    async def send_embed(self, embed: discord.Embed, channel=None):
+    async def send_embed(self, embed, channel=None):
         if type(channel) is str:
             for chan in self.get_all_channels():
                 if chan.id == channel:
                     channel = chan
         if channel:
-            await super().send_message(channel, embed=embed)
+            await self.current_message.channel.send(channel, embed=embed)
         else:
-            await super().send_message(self.current_message.channel, embed=embed)
+            await self.current_message.channel.send(self.current_message.channel, embed=embed)
 
-    async def code(self, message: str, language=''):
+    async def send_file(self, destination, file, filename):
+        await destination.send(file=discord.File(file, filename=filename))
+
+    async def code(self, message, language=''):
         """ Wrap a **bot.say()** message in a code block
 
         :param message:
@@ -218,7 +222,7 @@ class Monitor(discord.Client):
             str(plugin),
             str(hook),
             ', '.join(arg_str),
-            str(error)
+            str(error) + '\n```\n' + traceback.format_exc() + '\n```'
         )
 
         logging.error(report)
@@ -266,7 +270,7 @@ class Monitor(discord.Client):
 
         return
 
-    async def call_hooks(self, dep: str, *args, **kwargs):
+    async def call_hooks(self, dep, *args, **kwargs):
         """ |coro|
 
             Iterates through the attached plugins and calls any plugin
@@ -296,11 +300,11 @@ class Monitor(discord.Client):
             url='https://github.com/cheetelwin/guilty-spark'
         )
 
-        await self.change_presence(game=presence)
+        await self.change_presence(status=presence)
 
         await self.call_hooks('on_ready')
 
-    async def on_message(self, message: discord.Message):
+    async def on_message(self, message):
         """ |coro|
 
             Overload of base Client's on_message event. Parses any incoming
@@ -314,7 +318,7 @@ class Monitor(discord.Client):
         # Log the incoming message
         logging.info(
             '%s:%s:%s: %s',
-            message.server,
+            message.guild,
             message.channel,
             message.author.name,
             message.content
@@ -334,96 +338,96 @@ class Monitor(discord.Client):
         # Run all on_message hooks
         await self.call_hooks('on_message', message)
 
-    async def on_message_delete(self, message: discord.Message):
+    async def on_message_delete(self, message):
         """ on_message_delete discord.py hook """
         await self.call_hooks('on_message_delete', message)
 
-    async def on_message_edit(self, before: discord.Message, after: discord.Message):
+    async def on_message_edit(self, before, after):
         """ on_message_edit discord.py hook """
         await self.call_hooks('on_message_edit', before, after)
 
-    async def on_channel_delete(self, channel: discord.Channel):
+    async def on_channel_delete(self, channel):
         """ on_channel_delete discord.py hook """
         await self.call_hooks('on_channel_delete', channel)
 
-    async def on_channel_create(self, channel: discord.Channel):
+    async def on_channel_create(self, channel):
         """ on_channel_create discord.py hook """
         await self.call_hooks('on_channel_create', channel)
 
-    async def on_channel_update(self, before: discord.Channel,
-                                after: discord.Channel):
+    async def on_channel_update(self, before,
+                                after):
         """ on_channel_update discord.py hook """
         await self.call_hooks('on_channel_update', before, after)
 
-    async def on_member_join(self, member: discord.Member):
+    async def on_member_join(self, member):
         """ on_member_join discord.py hook """
         await self.call_hooks('on_member_join', member)
 
-    async def on_member_remove(self, member: discord.Member):
+    async def on_member_remove(self, member):
         """ on_member_remove discord.py hook """
         await self.call_hooks('on_member_remove', member)
 
-    async def on_member_update(self, before: discord.Member, after: discord.Member):
+    async def on_member_update(self, before, after):
         """ on_member_update discord.py hook """
         await self.call_hooks('on_member_update', before, after)
 
-    async def on_server_join(self, server: discord.Server):
+    async def on_server_join(self, server):
         """ on_server_join discord.py hook """
         await self.call_hooks('on_server_join', server)
 
-    async def on_server_remove(self, server: discord.Server):
+    async def on_server_remove(self, server):
         """ on_server_remove discord.py hook """
         await self.call_hooks('on_server_remove', server)
 
-    async def on_server_update(self, before: discord.Server, after: discord.Server):
+    async def on_server_update(self, before, after):
         """ on_server_update discord.py hook """
         await self.call_hooks('on_server_update', before, after)
 
-    async def on_server_role_create(self, role: discord.Role):
+    async def on_server_role_create(self, role):
         """ on_server_role_create discord.py hook """
         await self.call_hooks('on_server_role_create', role)
 
-    async def on_server_role_updated(self, before: discord.Role,
-                                     after: discord.Role):
+    async def on_server_role_updated(self, before,
+                                     after):
         """ on_server_role_updated discord.py hook """
         pass
 
-    async def on_server_emojis_update(self, before: discord.Server,
-                                      after: discord.Server):
+    async def on_server_emojis_update(self, before,
+                                      after):
         """ on_server_em discord.py hook """
         await self.call_hooks('on_server_emojis_update', before, after)
 
-    async def on_server_available(self, server: discord.Server):
+    async def on_server_available(self, server):
         """ on_server_available discord.py hook """
         await self.call_hooks('on_server_available', server)
 
-    async def on_server_unavailable(self, server: discord.Server):
+    async def on_server_unavailable(self, server):
         """ on_server_unavailable discord.py hook """
         await self.call_hooks('on_server_unavailable', server)
 
-    async def on_voice_state_update(self, before: discord.Member,
-                                    after: discord.Member):
+    async def on_voice_state_update(self, before,
+                                    after):
         """ on_voice_state_update discord.py hook """
         await self.call_hooks('on_voice_state_update', before, after)
 
-    async def on_member_ban(self, member: discord.Member):
+    async def on_member_ban(self, member):
         """ on_member_ban discord.py hook """
         await self.call_hooks('on_member_ban', member)
 
-    async def on_member_unban(self, server: discord.Server, user: discord.User):
+    async def on_member_unban(self, server, user):
         """ on_member_unban discord.py hook """
         await self.call_hooks('on_member_unban', server, user)
 
-    async def on_typing(self, channel: discord.Channel, user: discord.User,
-                        when: datetime.datetime):
+    async def on_typing(self, channel, user,
+                        when):
         """ on_typing discord.py hook """
         await self.call_hooks('on_typing', channel, user, when)
 
-    async def on_group_join(self, channel: discord.Channel, user: discord.User):
+    async def on_group_join(self, channel, user):
         """ on_group_join discord.py hook """
         await self.call_hooks('on_group_join', channel, user)
 
-    async def on_group_remove(self, channel: discord.Channel, user: discord.User):
+    async def on_group_remove(self, channel, user):
         """ on_group_remove discord.py hook """
         await self.call_hooks('on_group_remove', channel, user)
 
