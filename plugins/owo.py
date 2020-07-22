@@ -18,7 +18,7 @@ from guilty_spark.plugin_system.plugin import Plugin
 usage = 'Usage: !owo'
 
 api_image_endpoint = 'https://thisfursonadoesnotexist.com/v2/jpgs/'
-image_fmt = 'seed{}.jpg'
+image_fmt = 'seed{:0>5}.jpg'
 
 
 class Waifu(Plugin):
@@ -47,7 +47,7 @@ class Waifu(Plugin):
 
     async def get_trash(self, seed=None):
         if not seed:
-            seed = random.rand_int(0, 99999)
+            seed = random.randint(0, 99999)
 
         data = await self.api_request(f'{api_image_endpoint}{image_fmt.format(seed)}')
 
@@ -63,6 +63,7 @@ class Waifu(Plugin):
                 hasher = hashlib.new('md5')
                 hasher.update((' '.join(args)).encode())
                 seed = int.from_bytes(hasher.digest()[:5], 'big')
+                seed &= 0xFFFF
 
                 image = await self.get_trash(seed)
 

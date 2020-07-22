@@ -122,6 +122,8 @@ class SlothStats(Plugin):
 
     def ground_plot(self):
         x_axis = sorted([k for k in self.rates])
+        if len(x_axis) > 30:
+            x_axis = x_axis[-30:]
         y_axis = []
         for i in x_axis:
             y_axis.append(self.rates[i])
@@ -139,11 +141,11 @@ class SlothStats(Plugin):
 
         average = []
 
-        total = 0
+        total = x_axis[0]
         for i, x in enumerate(y_axis):
             if i > 0:
-                total -= total / 10
-                total += x / 10
+                total -= total / 30
+                total += x / 30
             else:
                 total = x
             average.append(total)
