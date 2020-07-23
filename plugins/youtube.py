@@ -20,7 +20,7 @@ async def youtube(*search):
 
     parameters = urlencode([('search_query', '+'.join(search))])
     html = await get('https://www.youtube.com/results?' + parameters)
-    links = re.findall('<a href="(/watch\?v=[^"]+)"', html)
+    links = re.findall('(/watch\?v=[^"]+)"', html)
     if links:
         link = 'http://youtube.com' + links[0]
         return link
