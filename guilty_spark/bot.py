@@ -51,7 +51,10 @@ class Monitor(discord.Client):
             return
 
         for plug in self.plugin_manager.make_plugs(self):
-            await self._register_plugin(plug)
+            try:
+                await self._register_plugin(plug)
+            except BaseException as e:
+                logging.error("Failed to register plugin: " + plug.name)
 
     async def _register_plugin(self, obj):
         """ Bind a new plugin to the bot

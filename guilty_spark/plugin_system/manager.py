@@ -1,4 +1,5 @@
 import logging
+import traceback
 from os import listdir
 from importlib import import_module, invalidate_caches
 
@@ -46,6 +47,7 @@ class PluginManager:
             module = import_module('plugins.{}'.format(name))
         except:
             logging.error('Failed to load plugin %s', name)
+            print('    ' + traceback.format_exc().replace('\n', '\n    '))
             return
 
         plug_obj = self.plugin_objects(module)
