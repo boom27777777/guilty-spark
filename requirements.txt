@@ -8,7 +8,7 @@ hiredis==0.2.0
 matplotlib==2.1.2
 multidict==4.1.0
 numpy==1.14.0
-Pillow==6.2.0
+Pillow==9.0.1
 pyparsing==2.2.0
 python-dateutil==2.6.1
 pytz==2017.3
